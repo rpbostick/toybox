@@ -258,13 +258,16 @@ test('<toy-box> without a known toy says so and fails loud', async () => {
   await win.happyDOM.close();
 });
 
-test('panel="floating" makes the panel a draggable window; a bad value fails loud', async () => {
+test('panel="floating" makes the drawer a window and back; a bad value fails loud', async () => {
   const { win, doc } = makeWindow({ catalog: testCatalog([]) });
   const drawer = add(doc, '<toy-drawer panel="floating"></toy-drawer>');
   const wrapper = drawer.shadowRoot.querySelector('.toybox');
   assert.equal(wrapper.dataset.panel, 'floating');
+  const frame = drawer.shadowRoot.querySelector('.drawer-window');
+  assert.deepEqual([frame.getAttribute('role'), frame.style.left === ''], ['dialog', false]);
   drawer.setAttribute('panel', 'inline');
   assert.equal(wrapper.dataset.panel, 'inline');
+  assert.deepEqual([frame.getAttribute('role'), frame.style.left, frame.style.zIndex], [null, '', ''], 'inline leaves no window behind');
   assert.throws(() => drawer.setAttribute('panel', 'sideways'), /panel="sideways": use one of inline, floating/);
   await win.happyDOM.close();
 });

@@ -1,5 +1,7 @@
-// Where the dice tray window sits and how big it is, kept fully inside the browser window, and the
-// form it is remembered in. All sizes are CSS pixels; viewport is { width, height }.
+// Where the dice tray window sits and how big it is: its default corner and sizes on top of the
+// shared window state (src/elements/window-state.js). All sizes are CSS pixels; viewport is
+// { width, height }.
+import * as WindowState from '../elements/window-state.js';
 
 // 4 in by 8 in at CSS's 96 px to the inch.
 export const DEFAULT_SIZE = { w: 384, h: 768 };
@@ -8,20 +10,8 @@ export const MIN_SIZE = { w: 280, h: 420 };
 export const MARGIN = 16;
 export const SIDES = ['left', 'right'];
 
-const within = (value, low, high) => Math.min(Math.max(value, low), high);
-
-/**
- * The whole rectangle stays inside the viewport. A viewport smaller than the minimum size wins
- * over the minimum: the tray shrinks to the viewport rather than leave it. A minimized tray is
- * only its title bar (barHeight tall) at the bottom of its rectangle, so then the bar is what
- * stays inside.
- */
-export function clamp(state, viewport, barHeight = 0) {
-  const w = Math.min(Math.max(state.w, MIN_SIZE.w), viewport.width);
-  const h = Math.min(Math.max(state.h, MIN_SIZE.h), viewport.height);
-  const top = state.minimized && barHeight > 0 ? barHeight - h : 0;
-  return { ...state, w, h, x: within(state.x, 0, viewport.width - w), y: within(state.y, top, viewport.height - h) };
-}
+/** The shared clamp at the tray's minimum, minimized to the bottom of its rectangle. */
+export const clamp = (state, viewport, barHeight = 0) => WindowState.clamp(state, viewport, { min: MIN_SIZE, barHeight, anchor: 'bottom' });
 
 /** side: the lower corner the tray opens in, the element's side="left|right". */
 export function defaultState(viewport, side) {
@@ -46,23 +36,4 @@ export function followSide(state, viewport, side) {
   return { ...state, x: spot.x, y: spot.y };
 }
 
-const KEYS = { x: 'number', y: 'number', w: 'number', h: 'number', open: 'boolean', minimized: 'boolean' };
-
-/**
- * The remembered state, or null when there is none or it is not one this library wrote (the
- * caller then uses defaultState): a layout preference, so a stale entry is not an error.
- */
-export function parse(text) {
-  if (typeof text !== 'string') return null;
-  let value;
-  try {
-    value = JSON.parse(text);
-  } catch {
-    return null;
-  }
-  if (!value || typeof value !== 'object') return null;
-  const ok = Object.entries(KEYS).every(([key, type]) => typeof value[key] === type && (type !== 'number' || Number.isFinite(value[key])));
-  return ok ? Object.fromEntries(Object.keys(KEYS).map((key) => [key, value[key]])) : null;
-}
-
-export const serialize = (state) => JSON.stringify(Object.fromEntries(Object.keys(KEYS).map((key) => [key, state[key]])));
+export const { parse, serialize } = WindowState;

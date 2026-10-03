@@ -1,5 +1,5 @@
 // Follows one pointer (mouse, pen or touch) from a press on `handle` until it is released, for
-// the dice tray's title bar and resize handle and the Draw button's grip. Presses on a control
+// the floating windows' title bars and resize handles (window.js) and the Draw button's grip. Presses on a control
 // inside the handle are left to the control.
 
 /**

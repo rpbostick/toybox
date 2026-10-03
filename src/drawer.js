@@ -1,13 +1,16 @@
-// Opens one toy at a time in a stage element. Used by <toy-drawer> and <toy-box>; kept apart
-// from the elements so the tests can drive it with fake elements.
+// Opens one toy at a time in a stage element. Used by <toy-drawer>, its toy windows and
+// <toy-box>; kept apart from the elements so the tests can drive it with fake elements.
 
-// hidden() says whether the stage cannot be seen right now; a toy that finishes loading then
-// starts paused, as if the tab had been hidden while it ran.
+// hidden() says whether the stage cannot be seen right now (or the toy is held paused for
+// another reason, such as a page's running cap); a toy that finishes loading then starts
+// paused, as if the tab had been hidden while it ran.
 export function createDrawer({ catalog, stage, environment, hidden = () => false, onChange = () => {} }) {
   let current = null; // { id, toy }
   let opening = 0;
   let pausedByUser = false;
-  let pausedByHiddenTab = false;
+  // Held paused from outside (setHidden): kept apart from pausedByUser, so a toy runs only
+  // when neither holds it.
+  let held = false;
 
   const notify = () => onChange(state());
 
@@ -41,22 +44,24 @@ export function createDrawer({ catalog, stage, environment, hidden = () => false
     toy.mount(stage, { theme, reducedMotion });
     current = { id, toy };
     pausedByUser = Boolean(reducedMotion);
-    pausedByHiddenTab = false;
-    if (hidden() && toy.running) {
-      toy.pause();
-      pausedByHiddenTab = true;
+    held = false;
+    if (hidden()) {
+      held = true;
+      if (toy.running) toy.pause();
     }
     notify();
   }
 
+  // Pause and Play follow what the user asked for, not whether the toy runs this moment: a toy
+  // held paused (hidden, or by a page's running cap) is not started by Play until the hold ends.
   function togglePause() {
     if (!current) return;
-    if (current.toy.running) {
-      current.toy.pause();
-      pausedByUser = true;
-    } else {
-      current.toy.resume();
+    if (pausedByUser) {
       pausedByUser = false;
+      if (!held) current.toy.resume();
+    } else {
+      pausedByUser = true;
+      if (current.toy.running) current.toy.pause();
     }
     notify();
   }
@@ -68,11 +73,11 @@ export function createDrawer({ catalog, stage, environment, hidden = () => false
 
   function setHidden(hidden) {
     if (!current) return;
-    if (hidden && current.toy.running) {
-      current.toy.pause();
-      pausedByHiddenTab = true;
-    } else if (!hidden && pausedByHiddenTab) {
-      pausedByHiddenTab = false;
+    if (hidden && !held) {
+      held = true;
+      if (current.toy.running) current.toy.pause();
+    } else if (!hidden && held) {
+      held = false;
       if (!pausedByUser) current.toy.resume();
     }
     notify();

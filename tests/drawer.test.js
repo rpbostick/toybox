@@ -90,6 +90,23 @@ test('a toy paused by the user stays paused when the tab comes back', async () =
   drawer.close();
 });
 
+test('Play on a toy held paused (hidden, or by the running cap) waits for the hold to end; Pause then holds it too', async () => {
+  const { toys, drawer } = setup();
+  await drawer.open('a');
+  drawer.setHidden(true);
+  drawer.togglePause();
+  assert.equal(toys.a.running, false, 'pausing a held toy does not start it');
+  assert.equal(drawer.state().pausedByUser, true);
+  drawer.setHidden(false);
+  assert.equal(toys.a.running, false, 'paused by the user stays paused');
+  drawer.setHidden(true);
+  drawer.togglePause();
+  assert.equal(toys.a.running, false, 'Play while held does not run it yet');
+  drawer.setHidden(false);
+  assert.equal(toys.a.running, true, 'it runs once the hold ends');
+  drawer.close();
+});
+
 test('reduced motion opens toys paused; Play starts them', async () => {
   const { toys, drawer, states } = setup({ reducedMotion: true });
   await drawer.open('a');

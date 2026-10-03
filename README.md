@@ -15,7 +15,7 @@ custom elements added with one script tag. No framework on the page.
 <toy-pages></toy-pages>
 ```
 
-`toybox.js` itself is small (about 24 KB); each element's code loads from a chunk next to it
+`toybox.js` itself is small (about 33 KB); each element's code loads from a chunk next to it
 the first time the page uses that element, and each toy's when it opens. Only the toys you can
 see run: they pause while the tab is hidden or they are scrolled off screen, and under
 `prefers-reduced-motion` they open paused (a still first frame; Play starts them).
@@ -43,9 +43,9 @@ its three builds:
 
 | File | Holds | Minified | Gzipped | Use it when |
 |---|---|---:|---:|---|
-| `toybox.js` (+ `chunks/`, `toys/`) | every element; each element's and toy's code is a chunk loaded on first use | 23.7 KB to start; 300.0 KB in all | 7.7 KB to start; 116.5 KB in all | the page can load ES modules: it downloads only what it shows |
-| `toybox.iife.js` | `<toy-drawer>`, `<toy-box>` and the sixteen toys | 185.4 KB | 61.3 KB | a page without modules that only wants the toys |
-| `toybox-all.iife.js` | every element and toy | 291.7 KB | 98.8 KB | a page without modules that wants the dice tray, background, drawing layer or pages |
+| `toybox.js` (+ `chunks/`, `toys/`) | every element; each element's and toy's code is a chunk loaded on first use | 32.7 KB to start; 349.3 KB in all | 10.4 KB to start; 134.6 KB in all | the page can load ES modules: it downloads only what it shows |
+| `toybox.iife.js` | `<toy-drawer>`, `<toy-box>` and the sixteen toys | 197.2 KB | 65.2 KB | a page without modules that only wants the toys |
+| `toybox-all.iife.js` | every element and toy | 340.9 KB | 115.7 KB | a page without modules that wants the dice tray, background, drawing layer or pages |
 
 The 3D dice (`dice-box/`, about 3.2 MB) are never inside these files; they load from next to
 the script the first time 3D dice are switched on. `SIZES.md` has the numbers for every chunk,
@@ -99,24 +99,53 @@ elements; the exports still work.
 
 ### `<toy-drawer>`
 
-A drawer of toy cards. Opening a card shows the toy in a panel with Pause, Reset and Close;
-one toy is open at a time, and opening another closes the first. Escape closes it too. Under
-the cards, "Credits and licences" lists each toy's source and licence.
+A drawer of toy cards. Under the cards, "Credits and licences" lists each toy's source and
+licence.
+
+With `panel="inline"` (the default), opening a card shows the toy in a panel under the cards
+with Pause, Reset and Close; one toy is open at a time, and opening another closes the first.
+Escape closes it too.
+
+With `panel="floating"`, the drawer is a window: it opens at the lower left, is dragged by its
+title bar, resized from its corner, minimized to its bar and restored, and closed to a "Toys"
+button where the element is. Opening a card opens that toy in a window of its own beside the
+drawer (its name, Pause, Reset, minimize, close), each new window 32 px further on so they do
+not stack exactly; several toys can be open side by side. A toy has one window at a time:
+opening it again brings its window to the front, as does a press in a window. Every window is
+kept on screen, and the drawer window and each toy's window (open or not, place, size,
+minimized) are remembered per browser and page (under the element's `id`). The windows are
+labelled non-modal dialogs: Tab reaches each title bar, the arrow keys move the window whose
+title bar has focus (Shift for bigger steps), and Escape closes the window it is pressed in.
+
+A toy in a window runs while its window is on screen and not minimized, and the tab is shown.
+At most `max-running` toys run at once across the page's floating drawers (the smallest value
+among them applies): those used last. The others pause with a "Paused, click to resume"
+overlay; a click there, or anywhere in the window, makes it the one used last.
 
 | Attribute | Values | Default |
 |---|---|---|
 | `toys` | comma-separated toy ids: which toys, in which order | all, in catalogue order |
 | `theme` | `light`, `dark`, `auto` (follows the system) | `auto` |
-| `panel` | `inline` (under the cards), `floating` (a window at the lower left, dragged by its title bar and resized from its corner) | `inline` |
+| `panel` | `inline` (one toy in a panel under the cards), `floating` (the drawer and each toy in windows of their own) | `inline` |
+| `max-running` | with `panel="floating"`: how many toys run at once, a whole number from 1 | `4` |
 
 An unknown toy id or attribute value throws an error naming the allowed ones.
 
 ```html
-<toy-drawer toys="bubble-wrap,fidget-spinner,pin-art" panel="floating" theme="dark"></toy-drawer>
+<toy-drawer id="toys" toys="bubble-wrap,fidget-spinner,pin-art" panel="floating" theme="dark"></toy-drawer>
+<script type="module">
+  const drawer = document.querySelector('#toys');
+  drawer.open('bubble-wrap');
+  drawer.open('fidget-spinner'); // two toys side by side
+</script>
 ```
 
-Script: `drawer.open(id)` (a promise), `drawer.close()`, `drawer.state` (`{ id, running,
-pausedByUser }`), `drawer.toys` (the catalogue entries shown). A `toy-change` event (bubbles,
+Script: `drawer.open(id)` (a promise), `drawer.close()` (floating: every toy window;
+`drawer.close(id)` one), `drawer.state` (`{ id, running, pausedByUser }` of the open toy, or
+floating, of the toy window used last), `drawer.windows` (floating: the open toy windows, used
+last first, as `{ id, running, pausedByUser, minimized, capped }`; `capped` means the running
+cap paused it), `drawer.windowState` (floating: the drawer window's `{ x, y, w, h, open,
+minimized }`), `drawer.toys` (the catalogue entries shown). A `toy-change` event (bubbles,
 `detail` is the state) fires whenever a toy opens, closes, pauses or resumes.
 
 ### `<toy-box>`
@@ -437,7 +466,8 @@ pictures and strokes; pass `state` (an earlier result) to reopen it after a relo
 
 Every element draws in a shadow root. Size them with CSS on the element; restyle the parts
 with `::part()`: `<toy-drawer>` has `drawer`, `cards`, `card`, `panel`, `panel-bar`,
-`credits`; `<toy-box>` has `box`, `bar`; `<dice-tray>` has `tray`, `bar`, `log`, `stage`,
+`credits`, and when floating `window` (the drawer's window), `window-bar` (any window's title
+bar), `toy-window`, `resize-handle`, `launcher`; `<toy-box>` has `box`, `bar`; `<dice-tray>` has `tray`, `bar`, `log`, `stage`,
 `pool`, `buttons`, `resize-handle`, `launcher`, `settings`; `<toy-background>` has `layer`,
 `controls`; `<draw-layer>` has `dock` (the Draw button and what it opens), `toolbar`; `<toy-pages>` has `bar`, `pages`, `toolbar`.
 

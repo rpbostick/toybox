@@ -1,7 +1,8 @@
 // Opens the demo page (dist/index.html) in headless Firefox and, in its <toy-drawer
 // id="drawer">, opens every toy, plays with it through real (trusted) pointer input over
 // WebDriver BiDi, and saves a screenshot of each mid-play. Also checks the <toy-box> embeds
-// pause off screen and run on screen, and that the floating drawer's window can be dragged.
+// pause off screen and run on screen, and the floating drawer: its window dragged, three toys
+// open in windows of their own, one moved, one minimized and one closed.
 // Also drives the page's elements: the dice tray, dragging the background, the drawing layer
 // and its eyedropper, the pages and the image editor.
 // Usage:
@@ -275,20 +276,67 @@ async function checkEmbeds() {
   writeFileSync(join(out, `boxes${suffix}.png`), Buffer.from(data, 'base64'));
 }
 
+/** Closes the floating drawer's window from its own button, so it covers nothing until its check. */
+async function closeFloatingDrawer() {
+  await ff.run(() => document.getElementById('floating').shadowRoot.querySelector('.window-close').click());
+  check('panel="floating": the drawer window closes to its launcher', await ff.run(() => {
+    const root = document.getElementById('floating').shadowRoot;
+    return root.querySelector('.drawer-window').hidden && !root.querySelector('.launcher').hidden;
+  }));
+}
+
+// The floating drawer by real pointer input: its launcher, a drag of its window, the demo's
+// "two side by side" button and a third toy from a card, then one toy window moved, one
+// minimized and one closed.
 async function checkFloatingWindow() {
+  const floating = (body) => ff.run(new Function(`const drawer = document.getElementById('floating'); const root = drawer.shadowRoot; return (${body});`));
   await scrollTo('floating');
-  await click('.card[data-toy="fidget-spinner"]', 0.5, 0.5, { host: 'floating' });
-  await waitFor(() => document.getElementById('floating').state.id === 'fidget-spinner', 'the floating drawer to open');
-  const before = await rect('.panel', 'floating');
-  check('panel="floating" opens at the lower left of the window', before.x < 40 && before.y + before.h > 800 - 40, JSON.stringify(before));
-  // Fractions of the title bar: right by 40 % of its width, up by about three bar heights.
-  await stroke('.bar', [[0.3, 0.5], [0.5, -1], [0.7, -2.5]], { host: 'floating', duration: 60 });
-  const after = await rect('.panel', 'floating');
-  check('the floating window moves when its title bar is dragged', after.x > before.x + 50 && after.y < before.y - 30, JSON.stringify({ before, after }));
-  const { data } = await ff.send('browsingContext.captureScreenshot', { context: ff.context, origin: 'viewport' });
-  writeFileSync(join(out, `floating${suffix}.png`), Buffer.from(data, 'base64'));
-  await click('.close', 0.5, 0.5, { host: 'floating' });
-  check('the floating window closes', await ff.run(() => document.getElementById('floating').shadowRoot.querySelector('.panel').hidden));
+  // The button first, while the closed drawer window covers nothing: the toys open beside where
+  // the drawer window will be.
+  const two = await pageRect('#two-toys');
+  await pointerAt([{ x: two.x + two.w / 2, y: two.y + two.h / 2 }]);
+  // Under reduced motion the toys open paused, so only their windows are waited for.
+  const ready = (count) => new Function(`const items = document.getElementById('floating').windows; return items.length === ${count} && (${reducedMotion} || items.every((item) => item.running));`);
+  await waitFor(ready(2), 'the two toys side by side');
+
+  await click('.launcher', 0.5, 0.5, { host: 'floating' });
+  const before = await rect('.drawer-window', 'floating');
+  check('panel="floating": the launcher opens the drawer window at the lower left', before.x < 40 && before.y + before.h > 800 - 40, JSON.stringify(before));
+  // Fractions of the title bar: right by 20 % of its width, up by about two bar heights. The
+  // press also brings the drawer window in front of the toy windows.
+  await stroke('.drawer-bar', [[0.3, 0.5], [0.4, -0.5], [0.5, -1.5]], { host: 'floating', duration: 60 });
+  const moved = await rect('.drawer-window', 'floating');
+  check('the drawer window moves when its title bar is dragged', moved.x > before.x + 50 && moved.y < before.y - 30, JSON.stringify({ before, moved }));
+  await click('.card[data-toy="pin-art"]', 0.5, 0.5, { host: 'floating' });
+  await waitFor(ready(3), 'three toy windows');
+  const boxes = await floating("[...root.querySelectorAll('.toy-window')].map((node) => { const r = node.getBoundingClientRect(); return { id: node.dataset.toy, x: r.left, y: r.top, w: r.width, h: r.height, canvas: Boolean(node.querySelector('.stage > canvas')) }; })");
+  const apart = new Set(boxes.map((box) => `${box.x},${box.y}`)).size === 3;
+  check('three toys open in three windows, each with its toy, none exactly on another', boxes.length === 3 && boxes.every((box) => box.canvas) && apart, JSON.stringify(boxes));
+  await shot('floating-three');
+
+  // A card of a toy already open brings its window to the front, where its bar can be reached.
+  const toFront = async (id) => {
+    await click(`.card[data-toy="${id}"]`, 0.5, 0.5, { host: 'floating' });
+    await waitFor(new Function(`return document.getElementById('floating').state.id === ${JSON.stringify(id)};`), `${id} to come to the front`);
+  };
+  await toFront('fidget-spinner');
+  check('opening an open toy again brings its window to the front, without a second window', await floating("root.querySelectorAll('.toy-window').length === 3 && [...root.querySelectorAll('.toy-window')].every((node) => Number(node.style.zIndex) <= Number(root.querySelector('.toy-window[data-toy=\"fidget-spinner\"]').style.zIndex))"));
+  const fidget = boxes.find((box) => box.id === 'fidget-spinner');
+  // Fractions of the title bar: left by 30 % of its width, up by about two bar heights.
+  await stroke('.toy-window[data-toy="fidget-spinner"] .bar', [[0.2, 0.5], [0.1, -0.5], [-0.1, -1.5]], { host: 'floating', duration: 60 });
+  const fidgetMoved = await rect('.toy-window[data-toy="fidget-spinner"]', 'floating');
+  check('a toy window moves when its title bar is dragged', fidgetMoved.x < fidget.x - 50 && fidgetMoved.y < fidget.y - 30, JSON.stringify({ fidget, fidgetMoved }));
+  await toFront('bubble-wrap');
+  await click('.toy-window[data-toy="bubble-wrap"] .minimize', 0.5, 0.5, { host: 'floating' });
+  const minimized = await floating("({ windows: drawer.windows.map(({ id, running, minimized }) => ({ id, running, minimized })), height: root.querySelector('.toy-window[data-toy=\"bubble-wrap\"]').getBoundingClientRect().height })");
+  const bubble = minimized.windows.find((item) => item.id === 'bubble-wrap');
+  check('minimizing a toy window leaves only its bar and pauses the toy', bubble.minimized && !bubble.running && minimized.height < 60, JSON.stringify(minimized));
+  await click('.toy-window[data-toy="pin-art"] .close', 0.5, 0.5, { host: 'floating' });
+  const left = await floating("({ ids: drawer.windows.map((item) => item.id).sort(), frames: root.querySelectorAll('.toy-window').length })");
+  check('closing a toy window removes it and its toy', JSON.stringify(left) === JSON.stringify({ ids: ['bubble-wrap', 'fidget-spinner'], frames: 2 }), JSON.stringify(left));
+  await shot('floating');
+  await floating('drawer.close()');
+  await closeFloatingDrawer();
 }
 
 // ---- the elements after the toys: real pointer input on each, in the demo page ----
@@ -716,7 +764,7 @@ try {
   await waitFor(() => Boolean(document.getElementById('drawer')?.shadowRoot?.querySelector('.card')), 'the drawer to render');
   const pageShot = await ff.send('browsingContext.captureScreenshot', { context: ff.context, origin: 'viewport' });
   writeFileSync(join(out, `demo${suffix}.png`), Buffer.from(pageShot.data, 'base64'));
-  for (const [name, run] of [['dice tray', checkDiceTray], ['background', checkBackground], ['draw layer', checkDrawLayer], ['pages and image editor', checkPagesAndEditor], ['chunks', checkChunksUnderSubPath], ['closing the dice tray', closeDiceTray]]) {
+  for (const [name, run] of [['floating drawer', closeFloatingDrawer], ['dice tray', checkDiceTray], ['background', checkBackground], ['draw layer', checkDrawLayer], ['pages and image editor', checkPagesAndEditor], ['chunks', checkChunksUnderSubPath], ['closing the dice tray', closeDiceTray]]) {
     try {
       await run();
     } catch (err) {

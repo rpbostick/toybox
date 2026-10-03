@@ -98,10 +98,14 @@
     </section>
 
     <section data-solid>
-      <h2>Some toys, in a floating window</h2>
-      <p class="lede">Pick toys and their order with <code>toys</code>; <code>panel="floating"</code> opens them in a window
-        at the lower left that you can drag by its title bar and resize from its corner.</p>
-      <pre><code>&lt;toy-drawer toys="bubble-wrap,fidget-spinner,pin-art,lava-lamp" panel="floating" theme="dark"&gt;&lt;/toy-drawer&gt;</code></pre>
+      <h2>Some toys, in floating windows</h2>
+      <p class="lede">Pick toys and their order with <code>toys</code>; <code>panel="floating"</code> makes the drawer a window
+        at the lower left, and each toy opens in a window of its own beside it, several at once. Drag a window by its title
+        bar, resize it from its corner, minimize or close it; each is remembered for this page. At most
+        <code>max-running</code> toys (4 unless set) run at once: the ones used last.</p>
+      <pre><code>&lt;toy-drawer toys="bubble-wrap,fidget-spinner,pin-art,lava-lamp" panel="floating" theme="dark"&gt;&lt;/toy-drawer&gt;
+drawer.open('bubble-wrap'); drawer.open('fidget-spinner');</code></pre>
+      <p><button type="button" id="two-toys">Open two toys side by side</button></p>
       <toy-drawer id="floating" toys="bubble-wrap,fidget-spinner,pin-art,lava-lamp" panel="floating" theme="dark"></toy-drawer>
     </section>
 
@@ -146,6 +150,11 @@
     const edit = () => editImage(portrait);
     portrait.addEventListener('click', edit);
     portrait.addEventListener('keydown', (event) => { if (event.key === 'Enter' || event.key === ' ') edit(); });
+    const floating = document.querySelector('#floating');
+    document.querySelector('#two-toys').addEventListener('click', () => {
+      floating.open('bubble-wrap');
+      floating.open('fidget-spinner');
+    });
   </script>
 </body>
 </html>

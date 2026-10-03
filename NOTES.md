@@ -33,11 +33,25 @@ load from `file://` in Firefox): `node e2e/serve.mjs` serves `dist/` under a sub
   starts paused. Under `prefers-reduced-motion` toys open paused (a still first frame; Play
   starts them). A theme change (attribute, or the system's under `theme="auto"`) re-mounts
   the open toy in the new theme, which resets it.
-- **The panel** of `panel="floating"` is 440 × 520 px at the lower left, leaving the toy
-  about 440 px wide and 400 to 440 px tall depending on its control bar; the title bar drags
-  it and the corner handle resizes it up to 96 % of the window's width and 94 % of its
-  height. `panel="inline"` is full width and 520 px tall, resizable in height. Canvases refit
-  to their box (checked in Firefox).
+- **The panel** of `panel="inline"` is full width and 520 px tall, resizable in height.
+  Canvases refit to their box (checked in Firefox).
+- **Windows.** `src/elements/window.js` is the one floating-window implementation: drag by the
+  title bar and resize from the corner handle (`pointer-track.js`), minimize to the bar,
+  close, arrow keys on the focused title bar, Escape, kept fully on screen and remembered in
+  `localStorage` (`window-state.js`: clamp, and a parse that refuses entries it did not
+  write). A stack per document numbers z-index from 2147483000 and renumbers on every raise.
+  The dice tray (`src/dice/tray-window.js`: its corner, launcher and side on top), the
+  floating drawer's own window and each toy window use it. With `panel="floating"` the drawer
+  window is 440 × 520 px at the lower left (at least 240 × 200), and each toy window
+  (`src/elements/toy-windows.js`) is 440 × 520 px (at least 300 × 360) beside it, 32 px
+  further on per open window. Each toy window has its own `createDrawer`, so pausing, hiding
+  and re-mounting work as in the panel. `src/elements/running-cap.js` is the page-wide cap:
+  of the windows that would run (open, not minimized, on screen by an IntersectionObserver,
+  not paused by the user, tab shown) the `max-running` most recently focused run and the rest
+  are held through `setHidden`, which is kept apart from the user's Pause, so Play on a held
+  toy waits for the hold to end. `tests/window.test.js` drives the window module with
+  stand-ins; `tests/drawer-windows.test.js` drives the floating drawer in happy-dom, with
+  animation frames and window listeners counted to show a closed window leaves none.
 - **Asset base.** The framed pages, their source zips and the licence file are resolved with
   `assetUrl()` against the directory of the script that loaded (`import.meta.url` for the
   modules, `document.currentScript` for the classic script); each `dist/toys/<id>.js` sets
@@ -79,8 +93,9 @@ load from `file://` in Firefox): `node e2e/serve.mjs` serves `dist/` under a sub
 - **Browser run.** `node e2e/drive.mjs <url> <dir> [--dark] [--reduced-motion]` opens the
   demo page in headless Firefox and every toy in its drawer, plays with each through real
   pointer input (mouse, and touch for several toys), screenshots it, and checks Pause,
-  Close, panel resize, reduced motion, the embeds pausing off screen, dragging the floating
-  window and a clean console. `tests/e2e.test.js` runs it (light) from a sub-path when
+  Close, panel resize, reduced motion, the embeds pausing off screen, the floating drawer (its
+  launcher and a drag of its window; the demo's two-side-by-side button and a card open three
+  toy windows; one is dragged, one minimized and paused, one closed) and a clean console. `tests/e2e.test.js` runs it (light) from a sub-path when
   Firefox is installed and the framed pages are built.
 
 - **The elements with chunks.** `<dice-tray>`, `<toy-background>`, `<draw-layer>` and

@@ -1,6 +1,6 @@
 // The Firefox run (e2e/drive.mjs) on the demo page, served under a sub-path: drives the dice
 // tray, the background, the drawing layer, the pages and the image editor, opens every toy in
-// the drawer, checks the embeds and the floating window. Skips without Firefox, or before
+// the drawer, checks the embeds and the floating drawer's windows. Skips without Firefox, or before
 // build.sh has built the framed pages and copied dice-box (none of which are in git).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

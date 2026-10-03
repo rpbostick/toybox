@@ -35,9 +35,28 @@ export const DRAWER_CSS = `
     background: var(--card); border: 1px solid var(--soft); border-radius: 12px; }
   .panel[hidden] { display: none; }
   .toybox[data-panel="inline"] .panel { position: relative; width: 100%; height: 520px; margin-top: .8rem; resize: vertical; }
-  .toybox[data-panel="floating"] .panel { position: fixed; z-index: 2147483000; left: 16px; bottom: 16px; width: 440px; height: 520px;
-    max-width: 96vw; max-height: 94vh; resize: both; box-shadow: 0 10px 40px rgba(0,0,0,.35); }
-  .toybox[data-panel="floating"] .bar { cursor: move; touch-action: none; }
+  .toybox[data-panel="inline"] .drawer-bar, .toybox[data-panel="inline"] .drawer-grip, .toybox[data-panel="inline"] .launcher,
+  .toybox[data-panel="floating"] .panel { display: none; }
+  /* Floating: the drawer and each toy are windows (src/elements/window.js sets their place, size and z-index). */
+  .toybox[data-panel="floating"] .drawer-window, .toy-window { position: fixed; z-index: 2147483000; display: flex; flex-direction: column;
+    overflow: hidden; background: var(--card); color: var(--ink); border: 1px solid var(--soft); border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,.35); }
+  .window[hidden] { display: none; }
+  .window.minimized > :not(.bar) { display: none; }
+  .window.moving { user-select: none; }
+  .window > .bar { cursor: move; touch-action: none; user-select: none; }
+  .window > .bar:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .toybox[data-panel="floating"] .drawer-body { flex: 1; min-height: 0; overflow: auto; padding: .6rem .6rem 1.4rem; }
+  .toybox[data-panel="floating"] .credits { margin-top: .6rem; }
+  .grip { position: absolute; right: 0; bottom: 0; width: 22px; height: 22px; cursor: nwse-resize; touch-action: none;
+    background: linear-gradient(135deg, transparent 0 45%, var(--soft) 45% 52%, transparent 52% 64%, var(--soft) 64% 71%, transparent 71%); }
+  .held { position: absolute; left: 0; right: 0; top: 2.6rem; bottom: 0; display: grid; place-items: center; margin: 0; padding: 1rem;
+    border: 0; background: rgba(0,0,0,.45); color: #fff; font: inherit; cursor: pointer; }
+  .held[hidden] { display: none; }
+  .launcher { padding: .4rem .9rem; border: 1px solid var(--soft); border-radius: 999px; background: var(--card); color: var(--ink);
+    font: inherit; cursor: pointer; }
+  .launcher[hidden] { display: none; }
+  @media print { .toybox[data-panel="floating"] .window, .toy-window, .launcher { display: none !important; } }
   .credits { margin-top: 1rem; font-size: .8rem; color: var(--soft); }
   .credits summary { cursor: pointer; }
   .credits a { color: inherit; }
