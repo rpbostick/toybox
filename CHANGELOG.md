@@ -4,6 +4,26 @@ Versions follow [semantic versioning](https://semver.org/): a change to an eleme
 attributes, the toy interface or the files in `dist/` that breaks a page using them is a new
 major version (a new minor version while the version starts with 0).
 
+## 0.6.1 (2026-10-03)
+
+The twisty cube can be turned, and says how.
+
+- Click a sticker to turn its face (cubing.js's own move-press input: counter-clockwise on a
+  click, clockwise on a right-click, the middle slice with Shift, the whole cube with Ctrl);
+  dragging still turns the view. The cube is drawn with cubing.js's PG3D view, which that
+  input needs.
+- ⟳ and ⟲ buttons for U, D, L, R, F, B under the cube, and x, y, z, M, E, S under "More", each
+  naming its face on hover. Keys while the cube's frame has the focus: a letter turns
+  clockwise, Shift+letter counter-clockwise, Ctrl/Cmd+Z undoes.
+- Undo, a move counter, a timer (on by default, can be turned off, remembered) from the first
+  turn after a scramble to the solve, and a "Solved!" note when a scrambled cube is solved.
+- A "?" panel explains turning, the notation and the view, with a diagram of the six faces;
+  it opens by itself the first time the cube is opened in a browser.
+- `postMessage`: the page also takes `{ type: 'move', move: "R'" }` and `{ type: 'undo' }`,
+  and posts `{ type: 'solved', moves, ms }` to the embedding page.
+- `dist/twisty/source.zip` carries the page's new files (`page.js`, `notation.js`,
+  `session.js`); a test checks the zip names every file of each framed page.
+
 ## 0.6.0 (2026-10-03)
 
 The floating toy drawer is a window, and toys open in windows of their own, several at once.

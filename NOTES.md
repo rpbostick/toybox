@@ -62,7 +62,8 @@ load from `file://` in Firefox): `node e2e/serve.mjs` serves `dist/` under a sub
   box (ToneMatrix Redux, GPL-3.0) run on their own pages, `dist/twisty/` and
   `dist/music-box/`, in an `<iframe>`. The drawer and those pages share no code or objects;
   they talk only by `postMessage` (`{ toy, type }`: the page sends `ready` to its parent on
-  any origin, the drawer sends `pause`, `resume`, `reset`, `scramble` to the frame's origin,
+  any origin, the twisty page also `solved`; the drawer sends `pause`, `resume`, `reset`,
+  `scramble` to the frame's origin, and the twisty page also takes `move` and `undo`,
   which is the script's and may differ from the embedding page's; commands wait for `ready`;
   messages from any other window are ignored). The twisty page takes the theme as
   `?theme=`. `tests/licences.test.js` checks the library's built files contain no GPL or MPL
@@ -260,12 +261,19 @@ Sizes are in `SIZES.md`. "Ready" means good enough to ship as it is.
 - **Ready:** yes.
 
 ### 10. Twisty cube — cubing.js `<twisty-player>` (MPL-2.0 or GPL-3.0-or-later), own page
-- **Adapted:** none of cubing.js; `src/twisty/main.js` makes a 3×3×3 player and listens for
-  the drawer's messages. Scramble is a random-move scramble (25 turns, never the same axis
-  twice in a row), not cubing.js's random-state scrambler, which needs its search worker.
-- **Works:** drag to turn the cube, Scramble, Reset, opened in the frame or alone.
-- **Doesn't:** large: 967 KB minified on disk (247 KB gzipped for the page). Pause has
-  nothing to stop when no move is animating.
+- **Adapted:** none of cubing.js; `src/twisty/main.js` makes a 3×3×3 player (PG3D view, with
+  cubing.js's "basic" move-press input) and `src/twisty/page.js` adds the buttons, keys,
+  Undo, counter, timer, solved note, instructions and messages. The solved check is cubing.js's
+  KPuzzle (`session.js`), from the player's own puzzle definition. Scramble is a random-move
+  scramble (25 turns, never the same axis twice in a row), not cubing.js's random-state
+  scrambler, which needs its search worker.
+- **Works:** click a sticker to turn its face, the ⟳/⟲ buttons and keys, Undo, move counter,
+  timer, "Solved!", the "?" panel; drag to turn the view; Scramble, Reset, opened in the frame
+  or alone.
+- **Doesn't:** a click turns the face counter-clockwise and a right-click clockwise: the
+  direction is fixed inside cubing.js. No drag-to-turn on the cube (a drag turns the view).
+  Large: about 1 MB minified on disk for the page (see `SIZES.md`). Pause has nothing to
+  stop when no move is animating.
 - **Ready:** yes as a framed page; whether it is worth its size is the open question.
 
 ### 11. Music box — ToneMatrix Redux (GPL-3.0), own page

@@ -8,8 +8,11 @@ The twisty cube page (`index.html`, `app/`) bundles cubing.js by the cubing.js c
 
 - `upstream/`: cubing.js at the tag of the npm version bundled (named in
   `build/package-lock.json`), unmodified.
-- `page/index.html` and `page/main.js`: the page around it. `main.js` makes a 3×3×3
-  `<twisty-player>`, a random-move scramble, and takes scramble, reset and pause from the
-  embedding page by `postMessage`.
+- `page/`: the page around it. `main.js` makes a 3×3×3 `<twisty-player>` that turns a layer
+  when a sticker is clicked; `page.js` adds the move buttons, keys, Undo, move counter, timer,
+  "Solved!" note, instructions panel and the `postMessage` API (scramble, reset, pause, move,
+  undo; solved back to the embedding page); `notation.js` holds the moves, keys and the
+  random-move scramble; `session.js` the move count, timer and solved check (cubing.js's
+  KPuzzle).
 - `build/`: `build.sh` and the Node scripts it runs. The twisty part bundles `page/main.js`
   with esbuild from the npm packages in `build/package-lock.json`.

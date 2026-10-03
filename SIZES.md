@@ -116,8 +116,8 @@ when a `<toy-background>` connects, and so on). Each
 
 | Page | Files | On disk | Gzipped | Of which |
 |---|---:|---:|---:|---|
-| Twisty cube, `dist/twisty/` (without source.zip) | 14 | 1020.2 KB | 247.5 KB | `app/`: 966.9 KB, 11 files |
-| Twisty cube source, `dist/twisty/source.zip` | 1 | 7132.3 KB | — | |
+| Twisty cube, `dist/twisty/` (without source.zip) | 14 | 1029.4 KB | 251.1 KB | `app/`: 971.4 KB, 11 files |
+| Twisty cube source, `dist/twisty/source.zip` | 1 | 7138.7 KB | — | |
 | Music box, `dist/music-box/` (without source.zip) | 9 | 490.0 KB | 118.5 KB | `app/`: 402.0 KB, 4 files |
 | Music box source, `dist/music-box/source.zip` | 1 | 308.2 KB | — | |
 

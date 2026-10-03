@@ -1,6 +1,6 @@
 {
   "name": "@rpbostick/toybox",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Desk toys, a dice tray, animated backgrounds, a drawing layer and note pages for any web page, as custom elements, with one script tag.",
   "license": "MIT AND Apache-2.0 AND Zlib AND Unlicense AND GPL-3.0 AND (MPL-2.0 OR GPL-3.0-or-later)",
   "type": "module",

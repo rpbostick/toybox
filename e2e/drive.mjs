@@ -2,7 +2,9 @@
 // id="drawer">, opens every toy, plays with it through real (trusted) pointer input over
 // WebDriver BiDi, and saves a screenshot of each mid-play. Also checks the <toy-box> embeds
 // pause off screen and run on screen, and the floating drawer: its window dragged, three toys
-// open in windows of their own, one moved, one minimized and one closed.
+// open in windows of their own, one moved, one minimized and one closed. In the twisty cube:
+// R and Shift+R by key (solved again), a move button, Undo, a click on the cube and the
+// instructions panel.
 // Also drives the page's elements: the dice tray, dragging the background, the drawing layer
 // and its eyedropper, the pages and the image editor.
 // Usage:
@@ -104,6 +106,27 @@ const press = (text) => ff.run((wanted) => {
 }, text);
 const frameDocument = `document.getElementById('drawer').shadowRoot.querySelector('.stage iframe')`;
 const inFrame = (body) => ff.run(new Function(`const frame = ${frameDocument}; return (${body})(frame);`));
+/** A real click on a node inside the drawer's framed page, at fractions of its box. */
+async function frameClick(selector, fx = 0.5, fy = 0.5) {
+  const frame = await rect('.stage iframe');
+  const inner = await inFrame(`(frame) => { const r = frame.contentDocument.querySelector(${JSON.stringify(selector)}).getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; }`);
+  const x = Math.round(frame.x + inner.x + inner.w * fx);
+  const y = Math.round(frame.y + inner.y + inner.h * fy);
+  await ff.send('input.performActions', { context: ff.context, actions: [{ type: 'pointer', id: 'mouse', parameters: { pointerType: 'mouse' },
+    actions: [{ type: 'pointerMove', x, y }, { type: 'pointerDown', button: 0 }, { type: 'pointerUp', button: 0 }] }] });
+  await ff.send('input.releaseActions', { context: ff.context });
+}
+/** Real key presses to whatever has the focus; { value, shift } each. */
+async function keys(presses) {
+  const SHIFT = '';
+  const actions = presses.flatMap(({ value, shift }) => [
+    ...(shift ? [{ type: 'keyDown', value: SHIFT }] : []),
+    { type: 'keyDown', value }, { type: 'keyUp', value },
+    ...(shift ? [{ type: 'keyUp', value: SHIFT }] : []),
+  ]);
+  await ff.send('input.performActions', { context: ff.context, actions: [{ type: 'key', id: 'keyboard', actions }] });
+  await ff.send('input.releaseActions', { context: ff.context });
+}
 
 const CANVAS = '.stage canvas';
 // What to do with each toy before its screenshot: real pointer input wherever it matters.
@@ -154,8 +177,39 @@ const PLAY = {
     await stroke(CANVAS, circle(0.5, 0.5, 0.35, 10, 0.5), { duration: 40 });
   },
   'twisty-cube': async () => {
-    await waitFor(new Function(`return Boolean(${frameDocument}?.contentDocument?.querySelector('twisty-player'));`), 'the twisty player');
+    await waitFor(new Function(`return Boolean(${frameDocument}?.contentDocument?.querySelector('twisty-player')) && ${frameDocument}.contentDocument.querySelector('#count').textContent === 'Moves: 0';`), 'the twisty page to start');
     await sleep(1000);
+    const twisty = (body) => inFrame(`async (frame) => { const doc = frame.contentDocument; const player = doc.querySelector('twisty-player'); return (${body}); }`);
+    const state = () => twisty("{ alg: (await player.experimentalModel.alg.get()).alg.toString(), solved: (await player.experimentalModel.currentPattern.get()).experimentalIsSolved({ ignorePuzzleOrientation: true, ignoreCenterOrientation: true }), count: doc.querySelector('#count').textContent, help: !doc.querySelector('#help').hidden }");
+    check('twisty-cube: the instructions show by themselves the first time', (await state()).help);
+    await frameClick('#help-close');
+    check('twisty-cube: "Got it" closes the instructions', !(await state()).help);
+    // Keys reach the page only while its frame has the focus, which the click above gave it.
+    await keys([{ value: 'r' }]);
+    await waitFor(new Function(`return ${frameDocument}.contentDocument.querySelector('#count').textContent === 'Moves: 1';`), 'R to be turned');
+    const turned = await state();
+    check('twisty-cube: the R key turns R', turned.alg === 'R' && !turned.solved, JSON.stringify(turned));
+    await keys([{ value: 'R', shift: true }]);
+    await sleep(600);
+    const back = await state();
+    check("twisty-cube: Shift+R turns R' and the cube is solved again", back.alg === "R R'" && back.solved && back.count === 'Moves: 2', JSON.stringify(back));
+    await frameClick('button[data-move="U"]');
+    await sleep(600);
+    const button = await state();
+    check('twisty-cube: the U ⟳ button turns U', button.alg === "R R' U" && button.count === 'Moves: 3', JSON.stringify(button));
+    await frameClick('#undo');
+    await sleep(600);
+    check('twisty-cube: Undo takes the U back', (await state()).alg === "R R'");
+    await frameClick('#stage', 0.5, 0.25);
+    await sleep(600);
+    const clicked = await state();
+    check("twisty-cube: a click on the top face turns it (U', cubing.js's direction)", clicked.alg === "R R' U'", JSON.stringify(clicked));
+    await frameClick('#help-button');
+    check('twisty-cube: "?" opens the instructions', (await state()).help);
+    const panel = await ff.node("document.getElementById('drawer').shadowRoot.querySelector('.panel')");
+    const { data } = await ff.send('browsingContext.captureScreenshot', { context: ff.context, origin: 'viewport', clip: { type: 'element', element: panel } });
+    writeFileSync(join(out, `twisty-cube-help${suffix}.png`), Buffer.from(data, 'base64'));
+    await frameClick('#help-close');
     await press('Scramble');
     await sleep(2500);
     await stroke('.stage iframe', [[0.3, 0.5], [0.6, 0.45]], { duration: 60 });

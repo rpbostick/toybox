@@ -220,6 +220,16 @@ test('the framed pages link their licence and source, and say ready to any embed
   assert.ok(existsSync(join(dist, 'twisty', 'LICENSES.txt')));
 });
 
+test("each framed page's source zip holds every file of its page under page/", { skip: distMissing }, () => {
+  for (const page of ['twisty', 'music-box']) {
+    // A zip names each file in plain bytes in its central directory.
+    const zip = readFileSync(join(dist, page, 'source.zip')).toString('latin1');
+    const files = readdirSync(join(root, 'src', page)).filter((name) => name !== 'SOURCE.md');
+    assert.ok(files.length > 1, page);
+    for (const name of files) assert.ok(zip.includes(`page/${name}`), `${page}/source.zip has page/${name}`);
+  }
+});
+
 test('dist/ carries our licence, and the demo page links the licence file without loading the framed pages\' code', { skip: distMissing }, () => {
   assert.equal(readFileSync(join(dist, 'LICENSE'), 'utf8'), readFileSync(join(root, 'LICENSE'), 'utf8'));
   assert.match(readFileSync(join(root, 'LICENSE'), 'utf8'), /^MIT License/);

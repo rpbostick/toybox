@@ -515,6 +515,15 @@ The twisty cube and the music box run on their own pages (`dist/twisty/`,
 `dist/music-box/`) in an `<iframe>`, so their copyleft code never mixes with the page's; the
 element talks to them only by `postMessage`, and links their source zips under the frame.
 
+The twisty cube turns a face when a sticker is clicked (counter-clockwise; right-click for
+clockwise), from the ⟳/⟲ buttons under it, or from the keys while its frame has the focus (a
+letter clockwise, Shift+letter counter-clockwise, Ctrl/Cmd+Z undo); dragging turns the view.
+It counts moves, times a solve from the first turn after a scramble, and its "?" panel
+explains the notation. Its page takes `{ toy: 'twisty-cube', type: 'move', move: "R'" }` and
+`{ toy: 'twisty-cube', type: 'undo' }` besides `scramble`, `reset` and `pause`, and posts
+`{ toy: 'twisty-cube', type: 'solved', moves, ms }` to its parent when a scrambled cube is
+solved.
+
 ## The toy interface
 
 Every toy module default-exports the same object, made by `defineToy` in `src/runtime.js`:

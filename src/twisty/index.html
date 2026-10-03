@@ -5,22 +5,79 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Twisty cube</title>
   <style>
-    :root { color-scheme: light; --paper: #f6f1e7; --ink: #2b2622; }
+    :root { color-scheme: light; --paper: #f6f1e7; --ink: #2b2622; --card: #fffdf8; --accent: #2f7d4f; }
     /* main.js sets data-theme from ?theme= or, opened alone, from the system setting. */
-    :root[data-theme="dark"] { color-scheme: dark; --paper: #1d1b19; --ink: #ece5d8; }
+    :root[data-theme="dark"] { color-scheme: dark; --paper: #1d1b19; --ink: #ece5d8; --card: #2a2724; --accent: #6fcf97; }
     html, body { height: 100%; margin: 0; background: var(--paper); color: var(--ink); font: 14px system-ui, sans-serif; }
     body { display: flex; flex-direction: column; }
+    main { position: relative; flex: 1; min-height: 0; display: flex; }
     #stage { flex: 1; min-height: 0; touch-action: none; }
-    .bar { display: flex; gap: .5rem; justify-content: center; padding: .4rem; }
-    .bar button { font: inherit; padding: .25rem .8rem; }
-    body.embedded .bar { display: none; }
+    button { font: inherit; }
+    .status { position: absolute; top: .3rem; left: .5rem; right: .5rem; display: flex; gap: .8rem; font-variant-numeric: tabular-nums; pointer-events: none; }
+    #solved { position: absolute; inset: 0; margin: auto; width: max-content; height: max-content; padding: .5rem 1.2rem; border-radius: 999px;
+      background: var(--accent); color: var(--paper); font-weight: 700; font-size: 1.3rem; pointer-events: none; animation: pop .5s ease-out; }
+    @keyframes pop { from { transform: scale(.4); opacity: 0; } 60% { transform: scale(1.15); } to { transform: scale(1); opacity: 1; } }
+    @media (prefers-reduced-motion: reduce) { #solved { animation: none; } }
+    .moves { display: flex; flex-wrap: wrap; gap: .2rem .5rem; justify-content: center; padding: .15rem .3rem; }
+    .turn { display: inline-flex; align-items: center; gap: .1rem; }
+    .turn b { min-width: 1em; text-align: center; }
+    .turn button { padding: 0 .35rem; line-height: 1.5; }
+    details.more { text-align: center; }
+    details.more summary { cursor: pointer; font-size: 12px; }
+    .bar { display: flex; flex-wrap: wrap; gap: .4rem; justify-content: center; align-items: center; padding: .25rem; }
+    .bar button { padding: .15rem .7rem; }
+    body.embedded .standalone { display: none; }
+    #help { position: absolute; inset: .4rem; overflow: auto; padding: .6rem .9rem; border-radius: 10px; background: var(--card);
+      box-shadow: 0 4px 20px rgb(0 0 0 / .25); line-height: 1.4; }
+    #help h2 { margin: 0 0 .3rem; font-size: 1rem; }
+    #help p { margin: .3rem 0; }
+    #help svg { float: right; margin: 0 0 .3rem .6rem; }
+    #help svg text { font: 700 11px system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; fill: #222; }
+    kbd { font: inherit; padding: 0 .25rem; border: 1px solid currentColor; border-radius: 3px; opacity: .85; }
     footer { font-size: 11px; text-align: center; padding: .25rem; opacity: .8; }
     footer a { color: inherit; }
   </style>
 </head>
 <body>
-  <div id="stage"></div>
-  <div class="bar"><button id="scramble" type="button">Scramble</button><button id="reset" type="button">Reset</button></div>
+  <main>
+    <div id="stage"></div>
+    <div class="status" aria-live="polite"><span id="count">Moves: 0</span><span id="timer"></span></div>
+    <div id="solved" role="status" hidden>Solved!</div>
+    <section id="help" role="dialog" aria-label="How to play" hidden>
+      <svg width="132" height="99" viewBox="0 0 132 99" role="img" aria-label="The six faces, unfolded: U above F, L to its left, R and then B to its right, D below">
+        <g stroke="#222" stroke-width="1.5">
+          <rect x="33" y="1" width="32" height="32" fill="#fff"/>
+          <rect x="1" y="33" width="32" height="32" fill="#ff8c0a"/>
+          <rect x="33" y="33" width="32" height="32" fill="#2c2"/>
+          <rect x="65" y="33" width="32" height="32" fill="#e22"/>
+          <rect x="97" y="33" width="32" height="32" fill="#36f"/>
+          <rect x="33" y="65" width="32" height="32" fill="#ff0"/>
+        </g>
+        <text x="49" y="17">U</text><text x="17" y="49">L</text><text x="49" y="49">F</text>
+        <text x="81" y="49">R</text><text x="113" y="49">B</text><text x="49" y="81">D</text>
+      </svg>
+      <h2>How to play</h2>
+      <p><b>Turn a layer:</b> click a sticker and its face turns counter-clockwise (⟲); right-click turns
+        it clockwise (⟳). <kbd>Shift</kbd>+click turns the middle slice next to it, <kbd>Ctrl</kbd>+click the whole cube.
+        Or use the <b>⟳</b> and <b>⟲</b> buttons under the cube, or the keys: a letter turns clockwise,
+        <kbd>Shift</kbd>+letter the other way.</p>
+      <p><b>Letters:</b> U, D, L, R, F, B are the up, down, left, right, front and back faces, clockwise
+        as you look at that face; ' (prime) means the other way, so R' turns R back. In "More": x, y, z
+        turn the whole cube; M, E, S the middle slices.</p>
+      <p><b>Look around:</b> drag anywhere on the cube or around it.</p>
+      <p><b>Undo</b> (<kbd>Ctrl</kbd>+<kbd>Z</kbd>) takes back the last turn. <b>Scramble</b> mixes the cube up
+        and starts the timer on your first turn; <b>Reset</b> puts it back solved.</p>
+      <p><button id="help-close" type="button">Got it</button></p>
+    </section>
+  </main>
+  <div class="moves" id="faces"></div>
+  <details class="more"><summary>More: x y z, M E S</summary><div class="moves" id="more"></div></details>
+  <div class="bar">
+    <button id="undo" type="button" title="Undo the last turn (Ctrl+Z)">Undo</button>
+    <label title="Time from the first turn after a scramble to the solve"><input id="timer-on" type="checkbox" checked> Timer</label>
+    <button id="help-button" type="button" title="How to play" aria-label="How to play" aria-controls="help" aria-expanded="false">?</button>
+    <span class="standalone"><button id="scramble" type="button">Scramble</button> <button id="reset" type="button">Reset</button></span>
+  </div>
   <footer>
     <a href="https://github.com/cubing/cubing.js">cubing.js</a> &lt;twisty-player&gt;, MPL-2.0 or GPL-3.0-or-later;
     bundles three.js (MIT) and other packages listed with their licences in <a href="LICENSES.txt">LICENSES.txt</a>;
