@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<!--
+  ToneMatrix Redux, standalone page for the toy drawer.
+  Derived from src/index.html of ToneMatrix Redux (https://github.com/lupine-dev/ToneMatrixRedux),
+  GPL-3.0; this page is GPL-3.0 too (see LICENSE). Changed: no analytics, canonical link,
+  favicons, web font or URL rewrite; the share box is hidden; ToneMatrix starts only after a
+  click on "Start" (bridge.js), so no sound plays before that; the canvas fits the frame.
+  Corresponding source: source.zip next to this page.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <title>Music box (ToneMatrix Redux)</title>
+    <link rel="stylesheet" href="app/style.css">
+    <style>
+      canvas, .canvaswrap { height: min(calc(100vh - 92px), 96vw); }
+      html, body { overflow: hidden; }
+      body { padding: 4px 6px; box-sizing: border-box; justify-content: flex-start; }
+      h1 { font-size: 1rem; margin: 0 0 4px; font-family: system-ui, sans-serif; font-weight: 300; }
+      p { margin: 4px 0; font-size: 11px; text-align: center; }
+      #muteButton { width: 22px; height: 22px; margin-right: 8px; }
+      #clearnotes { padding: 3px 6px; }
+      .share-wrap { display: none; }
+      #start { position: fixed; inset: 0; margin: auto; width: 12rem; height: 3rem; font: 600 1rem system-ui, sans-serif;
+        background: #333; color: #ddd; border: 1px solid #808080; border-radius: 6px; cursor: pointer; z-index: 10; }
+      #start:disabled { opacity: .5; cursor: progress; }
+      body.started #start { display: none; }
+    </style>
+  </head>
+  <body>
+    <h1>ToneMatrix Redux</h1>
+    <p class="share-wrap">
+      <input readonly id="clipboard-input"><button class="clipboard" data-clipboard-target="#clipboard-input">Copy</button>
+    </p>
+    <div class="canvaswrap">
+      <div class="overlay"></div>
+      <a class="play-btn" href="javascript:void(0)"></a>
+    </div>
+    <p><span id="muteButton"></span><a id="clearnotes" class="button" href="javascript:void(0)">Clear Notes</a>
+      Based on <a href="https://tonematrix.audiotool.com/">ToneMatrix</a>, by <a href="https://lupine.dev/">Wolfy</a>
+      (<a href="https://github.com/lupine-dev/ToneMatrixRedux">GitHub</a>), GPL-3.0:
+      <a href="LICENSE">licence</a>, <a href="source.zip">source</a>, <a href="LICENSES.txt">bundled libraries</a>.</p>
+    <button id="start" type="button" disabled>Start the music box</button>
+    <script src="app/all.js"></script>
+    <script src="bridge.js"></script>
+  </body>
+</html>

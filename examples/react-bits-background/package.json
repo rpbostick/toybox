@@ -1,0 +1,19 @@
+{
+  "name": "toybox-react-bits-background-example",
+  "private": true,
+  "type": "module",
+  "description": "A site that adds a React Bits background to Toybox's <toy-background> with registerBackground.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@rpbostick/toybox": "^0.3.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.0.0",
+    "vite": "^7.0.0"
+  }
+}

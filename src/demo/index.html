@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Toybox: desk toys, dice, backgrounds and drawing for any web page</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --paper: #f6f1e7; --ink: #2b2622; --soft: #8a7f72; --faint: #e6dccb; --code: #fffaf0; --panel: rgba(255, 250, 240, .9);
+      /* The Toybox elements draw on the page's own paper. */
+      --toybox-paper: var(--paper);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --paper: #1d1b19; --ink: #ece5d8; --soft: #9a9084; --faint: #3a3530; --code: #26231f; --panel: rgba(38, 35, 31, .9); }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font: 15px/1.5 system-ui, sans-serif; }
+    header, main, footer { max-width: 1100px; margin: 0 auto; padding: 0 1rem; }
+    section { background: var(--panel); border-radius: 12px; padding: .2rem 1rem 1rem; margin: 1.2rem 0; }
+    h1 { font-weight: 500; font-size: 1.6rem; margin: 0 0 .25rem; }
+    h2 { font-weight: 500; font-size: 1.15rem; margin: 1rem 0 .4rem; }
+    header { padding-top: 1.2rem; }
+    header > div { background: var(--panel); border-radius: 12px; padding: .8rem 1rem; }
+    header p, .lede { color: var(--soft); margin: 0 0 .8rem; }
+    pre { background: var(--code); border: 1px solid var(--faint); border-radius: 8px; padding: .6rem .8rem; overflow-x: auto; font-size: .85rem; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .boxes { display: flex; flex-wrap: wrap; gap: 1rem; }
+    .boxes toy-box { width: 300px; height: 340px; }
+    .card { display: grid; grid-template-columns: 140px 1fr; gap: 1rem; max-width: 620px; padding: 1rem; border: 2px solid var(--ink);
+      border-radius: 6px; background: var(--code); }
+    .card h3 { margin: 0; font-weight: 600; }
+    .card .portrait { width: 140px; height: 180px; border: 1px dashed var(--soft); border-radius: 6px; background: var(--faint); cursor: pointer; }
+    .card .stats { display: flex; flex-wrap: wrap; gap: .4rem; margin: .6rem 0; }
+    .card .stats button { font: inherit; padding: .2rem .6rem; border: 1px solid var(--soft); border-radius: 6px; background: var(--paper); color: var(--ink); cursor: pointer; }
+    footer { padding-bottom: 2rem; font-size: .85rem; color: var(--soft); }
+    footer > div { background: var(--panel); border-radius: 12px; padding: .2rem 1rem; }
+    footer a, main a { color: inherit; }
+    @media print { header, footer, section:not(.keep) { display: none; } section { background: none; } }
+  </style>
+</head>
+<body>
+  <toy-background id="background" class="no-print"></toy-background>
+  <header data-solid>
+    <div>
+      <h1>Toybox</h1>
+      <p>Desk toys, a dice tray, animated backgrounds, a drawing layer and extra pages for any web page, with one script
+        tag. Each part's code loads the first time the page uses it; the toys pause when the tab is hidden or they scroll
+        out of view, and open paused when the system asks for reduced motion.</p>
+    </div>
+  </header>
+  <main>
+    <section data-solid>
+      <h2>Add it to a page</h2>
+      <p class="lede">As an ES module, from wherever this folder is served (every file it loads is found next to the script):</p>
+      <pre><code>&lt;script type="module" src="https://example.com/toybox/toybox.js"&gt;&lt;/script&gt;</code></pre>
+      <p class="lede">Or as a classic script: the toys alone, or everything but the 3D dice in one file:</p>
+      <pre><code>&lt;script src="https://example.com/toybox/toybox.iife.js"&gt;&lt;/script&gt;
+&lt;script src="https://example.com/toybox/toybox-all.iife.js"&gt;&lt;/script&gt;</code></pre>
+    </section>
+
+    <section data-solid>
+      <h2>An animated background</h2>
+      <p class="lede">Behind this page. Its controls sit where the element is (here, at the top of the page); press the name to
+        see the next of six, drag on bare background to stir it, turn on Color mode and scroll the mouse wheel over bare
+        background, or pick a colour on the wheel. Content marked <code>data-solid</code> is not background.</p>
+      <pre><code>&lt;toy-background&gt;&lt;/toy-background&gt;   (all six; effects="lines,aurora,stars" picks some, controls="compact|none" shows fewer)</code></pre>
+    </section>
+
+    <section data-solid class="keep">
+      <h2>A card with a drawing layer and dice</h2>
+      <p class="lede">Draw on the card with the Draw button in the window's lower left corner (its ⋯ menu moves it to another corner; drag its grip to put it anywhere); Show scribbles and Print scribbles are separate. The
+        buttons carry <code>data-roll</code> and roll into the dice tray; click the portrait to open the image editor.</p>
+      <pre><code>&lt;draw-layer id="card-ink" for="#card"&gt;&lt;/draw-layer&gt;
+&lt;button data-roll="2d6+2" data-roll-label="STR" data-roll-bands="wod"&gt;STR +2&lt;/button&gt;
+&lt;dice-tray id="dice" roll-links save-log&gt;&lt;/dice-tray&gt;</code></pre>
+      <draw-layer id="card-ink" for="#card"></draw-layer>
+      <div class="card" id="card">
+        <div class="portrait" id="portrait" role="button" tabindex="0" aria-label="Edit the portrait"></div>
+        <div>
+          <h3>Ana the Unlucky</h3>
+          <p>A thief with a lucky coin that never lands the way she calls it.</p>
+          <div class="stats">
+            <button type="button" data-roll="2d6+2" data-roll-label="STR" data-roll-bands="wod">STR +2</button>
+            <button type="button" data-roll="2d6-1" data-roll-label="WIS" data-roll-bands="wod">WIS −1</button>
+            <button type="button" data-roll="1d6+1" data-roll-label="Dagger">Dagger d6+1</button>
+            <button type="button" data-roll="3d6kh1" data-roll-label="Hit dice">Hit dice 3d6kh1</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section data-solid>
+      <h2>The toy drawer</h2>
+      <p class="lede">Every toy as a card; opening one shows it in a panel under the cards with Pause, Reset and Close.</p>
+      <pre><code>&lt;toy-drawer&gt;&lt;/toy-drawer&gt;</code></pre>
+      <toy-drawer id="drawer"></toy-drawer>
+    </section>
+
+    <section data-solid>
+      <h2>Some toys, in a floating window</h2>
+      <p class="lede">Pick toys and their order with <code>toys</code>; <code>panel="floating"</code> opens them in a window
+        at the lower left that you can drag by its title bar and resize from its corner.</p>
+      <pre><code>&lt;toy-drawer toys="bubble-wrap,fidget-spinner,pin-art,lava-lamp" panel="floating" theme="dark"&gt;&lt;/toy-drawer&gt;</code></pre>
+      <toy-drawer id="floating" toys="bubble-wrap,fidget-spinner,pin-art,lava-lamp" panel="floating" theme="dark"></toy-drawer>
+    </section>
+
+    <section data-solid>
+      <h2>One toy, embedded</h2>
+      <p class="lede">A <code>&lt;toy-box&gt;</code> shows one toy at the size you give it (320 × 360 px if you give none).</p>
+      <pre><code>&lt;toy-box toy="newtons-cradle" style="width: 300px; height: 340px"&gt;&lt;/toy-box&gt;
+&lt;toy-box toy="lava-lamp" theme="dark"&gt;&lt;/toy-box&gt;
+&lt;toy-box toy="zen-garden" theme="light"&gt;&lt;/toy-box&gt;</code></pre>
+      <div class="boxes">
+        <toy-box toy="newtons-cradle"></toy-box>
+        <toy-box toy="lava-lamp" theme="dark"></toy-box>
+        <toy-box toy="zen-garden" theme="light"></toy-box>
+      </div>
+      <p class="lede">Toy ids: <span id="ids"></span>.</p>
+    </section>
+
+    <section data-solid class="keep">
+      <h2>Notes and drawing pages</h2>
+      <p class="lede">Pages kept in this browser and printed one per sheet after the page. Save file writes one JSON file of
+        the pages, the card's scribbles and the tray's log; Open file reads it back.</p>
+      <pre><code>&lt;toy-pages id="pages"&gt;&lt;/toy-pages&gt;</code></pre>
+      <toy-pages id="pages"></toy-pages>
+    </section>
+  </main>
+  <footer data-solid>
+    <div>
+      <p>Toybox's own code is MIT. The toys adapted from other projects keep their licences, listed in each drawer's
+        credits. The backgrounds and the dice notation are Toybox's own (the shader backgrounds use David Hoskins' Hash
+        without Sine, MIT); the 3D dice are dice-box (MIT) with Babylon.js (Apache-2.0) and ammo.js (Zlib); drawing uses
+        perfect-freehand (MIT) and idb-keyval (Apache-2.0).
+        Full texts in <a href="THIRD_PARTY_LICENSES.txt">THIRD_PARTY_LICENSES.txt</a>. The twisty cube (cubing.js,
+        MPL-2.0 or GPL-3.0-or-later) and the music box (ToneMatrix Redux, GPL-3.0) run on their own pages in a frame, with
+        their source zips linked under them.</p>
+    </div>
+  </footer>
+  <dice-tray id="dice" roll-links save-log></dice-tray>
+  <script type="module">
+    import { CATALOG, editImage } from './toybox.js';
+    document.querySelector('#ids').textContent = CATALOG.map((meta) => meta.id).join(', ');
+    const portrait = document.querySelector('#portrait');
+    const edit = () => editImage(portrait);
+    portrait.addEventListener('click', edit);
+    portrait.addEventListener('keydown', (event) => { if (event.key === 'Enter' || event.key === ' ') edit(); });
+  </script>
+</body>
+</html>

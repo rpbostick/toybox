@@ -1,0 +1,53 @@
+{
+  "name": "@rpbostick/toybox",
+  "version": "0.5.0",
+  "description": "Desk toys, a dice tray, animated backgrounds, a drawing layer and note pages for any web page, as custom elements, with one script tag.",
+  "license": "MIT AND Apache-2.0 AND Zlib AND Unlicense AND GPL-3.0 AND (MPL-2.0 OR GPL-3.0-or-later)",
+  "type": "module",
+  "keywords": [
+    "custom-elements",
+    "web-components",
+    "desk-toys",
+    "fidget",
+    "physics",
+    "canvas",
+    "dice",
+    "animated-background",
+    "drawing"
+  ],
+  "exports": {
+    ".": "./dist/toybox.js",
+    "./toybox.iife.js": "./dist/toybox.iife.js",
+    "./toybox-all.iife.js": "./dist/toybox-all.iife.js",
+    "./toys/*": "./dist/toys/*.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist/",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "sideEffects": [
+    "./dist/toybox.js",
+    "./dist/toybox.iife.js",
+    "./dist/toybox-all.iife.js",
+    "./dist/toys/*.js"
+  ],
+  "scripts": {
+    "build": "bash build.sh",
+    "prepack": "bash build.sh",
+    "release": "bash scripts/release.sh",
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "@3d-dice/dice-box": "^1.1.4",
+    "@rpbostick/reactbits-kit": "github:rpbostick/reactbits-kit#v0.3.0",
+    "cubing": "^0.63.8",
+    "esbuild": "0.28.2",
+    "happy-dom": "^20.14.5",
+    "idb-keyval": "^6.3.0",
+    "matter-js": "^0.20.0",
+    "perfect-freehand": "^1.2.3",
+    "sass": "^1.105.1"
+  }
+}

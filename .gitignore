@@ -1,0 +1,11 @@
+node_modules/
+vendor/
+.build/
+release/
+# @3d-dice/dice-box's postinstall copies its assets here; the build copies them from the
+# package into dist/dice-box/ instead.
+public/
+# The build's output, all of it written by build.sh from src/, node_modules and vendor/ (the demo
+# page from src/demo/index.html, the framed pages from src/twisty/ and src/music-box/). Deliberate:
+# not in git, since a clean build names its chunks by content hash and committed copies drift.
+dist/

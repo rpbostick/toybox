@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A React Bits background in Toybox</title>
+</head>
+<body>
+  <!-- No effects="…": the element cycles every background, the registered one included. -->
+  <toy-background></toy-background>
+  <main data-solid>
+    <h1>A site with its own background</h1>
+    <p>Press the background's name button until it shows "Aurora (React Bits)".</p>
+  </main>
+  <!-- One module: it imports Toybox (which defines the elements) and registers the background. -->
+  <script type="module" src="./aurora-background.jsx"></script>
+</body>
+</html>

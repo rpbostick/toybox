@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Twisty cube</title>
+  <style>
+    :root { color-scheme: light; --paper: #f6f1e7; --ink: #2b2622; }
+    /* main.js sets data-theme from ?theme= or, opened alone, from the system setting. */
+    :root[data-theme="dark"] { color-scheme: dark; --paper: #1d1b19; --ink: #ece5d8; }
+    html, body { height: 100%; margin: 0; background: var(--paper); color: var(--ink); font: 14px system-ui, sans-serif; }
+    body { display: flex; flex-direction: column; }
+    #stage { flex: 1; min-height: 0; touch-action: none; }
+    .bar { display: flex; gap: .5rem; justify-content: center; padding: .4rem; }
+    .bar button { font: inherit; padding: .25rem .8rem; }
+    body.embedded .bar { display: none; }
+    footer { font-size: 11px; text-align: center; padding: .25rem; opacity: .8; }
+    footer a { color: inherit; }
+  </style>
+</head>
+<body>
+  <div id="stage"></div>
+  <div class="bar"><button id="scramble" type="button">Scramble</button><button id="reset" type="button">Reset</button></div>
+  <footer>
+    <a href="https://github.com/cubing/cubing.js">cubing.js</a> &lt;twisty-player&gt;, MPL-2.0 or GPL-3.0-or-later;
+    bundles three.js (MIT) and other packages listed with their licences in <a href="LICENSES.txt">LICENSES.txt</a>;
+    <a href="source.zip">source</a>.
+  </footer>
+  <script type="module" src="app/main.js"></script>
+</body>
+</html>
