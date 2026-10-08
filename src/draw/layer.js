@@ -74,6 +74,7 @@ export function mount(host, wrapper) {
   saveState.setAttribute('aria-live', 'polite');
   const saver = autosave(win, key, () => ({ strokes: ink.dump() }), (text) => { saveState.textContent = text; });
   const toolbar = createToolbar(doc, {
+    toggleLabel: host.label,
     onDraw: (drawing) => {
       overlay.dataset.drawing = drawing ? '1' : '0';
       dock.setDrawing(drawing);
@@ -178,6 +179,7 @@ export function mount(host, wrapper) {
     },
     attributeChanged(name) {
       if (name === 'corner') dock.setCorner(host.corner);
+      else if (name === 'label') toolbar.setToggleLabel(host.label);
     },
     place: () => dock.place(),
   };

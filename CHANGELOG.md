@@ -4,6 +4,16 @@ Versions follow [semantic versioning](https://semver.org/): a change to an eleme
 attributes, the toy interface or the files in `dist/` that breaks a page using them is a new
 major version (a new minor version while the version starts with 0).
 
+## 0.6.2 (2026-10-08)
+
+The two Draw buttons on a page with both `<draw-layer>` and `<toy-pages>` say what they draw on.
+
+- `<draw-layer label="…">` sets its Draw button's text (after the ✎) and title, e.g.
+  `label="Scribble"`; absent or blank it stays "Draw", and a changed attribute renames the
+  button.
+- `<toy-pages>`' button reads "✎ Draw on pages" and shows only while at least one notes or
+  drawing page exists; removing the last page hides it and turns its drawing off.
+
 ## 0.6.1 (2026-10-03)
 
 The twisty cube can be turned, and says how.

@@ -106,6 +106,7 @@ export function mount(host, wrapper) {
   };
   const toolbar = createToolbar(doc, {
     tools: ['pen', 'highlighter', 'eraser', 'move'],
+    toggleLabel: 'Draw on pages',
     onDraw: (drawing) => container.classList.toggle('drawing', drawing),
     onUndo: () => active?.ink.undo(), onRedo: () => active?.ink.redo(), onClear: () => active?.ink.clear(),
     onPicking: (picking) => container.classList.toggle('picking', picking),
@@ -121,6 +122,7 @@ export function mount(host, wrapper) {
   });
   bar.prepend(toolbar.el);
   on(toolbar.el, 'click', () => container.classList.toggle('moving', toolbar.tool === 'move'));
+  showToggle();
 
   function setActive(entry) {
     active = entry;
@@ -134,6 +136,14 @@ export function mount(host, wrapper) {
       entry.down.disabled = i === pages.length - 1;
     });
     if (active) toolbar.showTarget(active.label.textContent);
+    showToggle();
+  }
+
+  // With no page there is nothing for Draw on pages to draw on, and a button that does nothing
+  // reads as drawing being broken (beside a <draw-layer>'s own Draw button, most of all).
+  function showToggle() {
+    toolbar.toggle.hidden = pages.length === 0;
+    if (pages.length === 0 && toolbar.drawing) toolbar.setDraw(false);
   }
 
   const button = (className, text) => Object.assign(doc.createElement('button'), { type: 'button', className: `btn ${className}`, textContent: text });

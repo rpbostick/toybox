@@ -1,4 +1,4 @@
-// <draw-layer for="#selector" id="…" corner="…" toggles-scope="layer|browser" theme="…">: a
+// <draw-layer for="#selector" id="…" corner="…" label="…" toggles-scope="layer|browser" theme="…">: a
 // scribble layer over the element `for` names, with a Draw button in a corner of the window
 // that opens its pen tool bar, Show scribbles and Print scribbles. This class is all toybox.js
 // holds of it; the layer (src/draw/layer.js, with perfect-freehand and idb-keyval) is the chunk
@@ -7,11 +7,12 @@ import { DEFAULT_CORNER, checkCorner } from '../draw/button-place.js';
 import { lazyElementBase } from './lazy.js';
 
 export const TOGGLES_SCOPES = ['layer', 'browser'];
+const DEFAULT_LABEL = 'Draw';
 
 export function drawLayerClass(Base, catalog, load) {
   const Lazy = lazyElementBase(Base, { load, css: ':host { display: block; }' });
   return class DrawLayer extends Lazy {
-    static get observedAttributes() { return [...super.observedAttributes, 'for', 'corner', 'toggles-scope']; }
+    static get observedAttributes() { return [...super.observedAttributes, 'for', 'corner', 'toggles-scope', 'label']; }
 
     connected() {
       super.connected();
@@ -21,7 +22,7 @@ export function drawLayerClass(Base, catalog, load) {
     }
 
     attributeChanged(name) {
-      if (name === 'corner') {
+      if (name === 'corner' || name === 'label') {
         void this.corner;
         super.attributeChanged(name);
         return;
@@ -47,6 +48,9 @@ export function drawLayerClass(Base, catalog, load) {
 
     /** corner="bottom-left|bottom-right|top-left|top-right": where the Draw button sits until moved. */
     get corner() { return checkCorner(this.getAttribute('corner') ?? DEFAULT_CORNER, '<draw-layer>'); }
+
+    /** label="…": the Draw button's text after the ✎, and its title; "Draw" when absent or blank. */
+    get label() { return this.getAttribute('label')?.trim() || DEFAULT_LABEL; }
 
     /** toggles-scope="layer|browser": Show and Print scribbles kept per layer, or once per browser. */
     get togglesScope() {

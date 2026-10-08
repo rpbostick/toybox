@@ -25,12 +25,13 @@ export const TOOLBAR_CSS = `
 
 /**
  * tools: which of pen, highlighter, eraser, move to offer. drawToggle false leaves the tools
- * always on (the image editor). Callbacks: onDraw(on), onUndo(), onRedo(), onClear(),
+ * always on (the image editor); toggleLabel names the Draw button, so a page with two of them
+ * can say what each draws on. Callbacks: onDraw(on), onUndo(), onRedo(), onClear(),
  * onPicking(on) while the eyedropper waits for a click on the surface, and
  * sampleAt(pointerEvent), resolving to the #rrggbb under the click (eyedropper.js) for browsers
  * without the EyeDropper API. The host passes its drawing surface to watchPicks().
  */
-export function createToolbar(doc, { tools = ['pen', 'highlighter', 'eraser'], drawToggle = true, onDraw = () => {}, onUndo, onRedo, onClear, onPicking = () => {}, sampleAt }) {
+export function createToolbar(doc, { tools = ['pen', 'highlighter', 'eraser'], drawToggle = true, toggleLabel = 'Draw', onDraw = () => {}, onUndo, onRedo, onClear, onPicking = () => {}, sampleAt }) {
   for (const name of tools) if (!TOOL_LABELS[name]) throw new Error(`no drawing tool ${name}`);
   if (typeof sampleAt !== 'function') throw new Error('createToolbar: sampleAt(event) must be a function');
   const win = doc.defaultView;
@@ -47,7 +48,7 @@ export function createToolbar(doc, { tools = ['pen', 'highlighter', 'eraser'], d
   bar.setAttribute('aria-label', 'Drawing tools');
   bar.setAttribute('part', 'toolbar');
   bar.innerHTML = `
-    ${drawToggle ? '<button type="button" class="btn draw" aria-pressed="false" title="Draw instead of using the page">✎ Draw</button>' : ''}
+    ${drawToggle ? '<button type="button" class="btn draw" aria-pressed="false"></button>' : ''}
     <span class="tools when-drawing">${tools.map((key) => `<button type="button" class="btn" data-tool="${key}" aria-pressed="${key === tool}">${TOOL_LABELS[key]}</button>`).join('')}</span>
     <span class="swatches when-drawing">${SWATCHES.map((color) => `<button type="button" class="swatch" data-color="${color}" style="background:${color}" aria-label="Colour ${color}"></button>`).join('')}</span>
     <label class="check when-drawing">Colour <input type="color" class="color"></label>
@@ -68,6 +69,14 @@ export function createToolbar(doc, { tools = ['pen', 'highlighter', 'eraser'], d
   // it in place while the bar opens beside it).
   const toggle = $('.draw');
   toggle?.addEventListener('click', () => setDraw(!drawing), { signal: abort.signal });
+  // As text, not markup: the label can come from a page's attribute.
+  function setToggleLabel(label) {
+    if (typeof label !== 'string' || !label.trim()) throw new Error(`createToolbar: the Draw button's label must be text, not ${JSON.stringify(label)}`);
+    if (!toggle) throw new Error('createToolbar: no Draw button to label without drawToggle');
+    toggle.textContent = `✎ ${label}`;
+    toggle.title = label;
+  }
+  if (toggle) setToggleLabel(toggleLabel);
   const say = (text) => { $('.pickstate').textContent = text; };
 
   function showRecents() {
@@ -204,6 +213,7 @@ export function createToolbar(doc, { tools = ['pen', 'highlighter', 'eraser'], d
     brush,
     setTool,
     setDraw,
+    setToggleLabel,
     get tool() { return tool; },
     get drawing() { return drawing; },
     get picking() { return picking; },

@@ -377,6 +377,7 @@ the menu wins over `corner`.
 | `for` | a selector: the element drawn over | (required) |
 | `id` | the name the strokes are kept under | the `for` selector |
 | `corner` | `bottom-left`, `bottom-right`, `top-left`, `top-right`: where the Draw button sits | `bottom-left` |
+| `label` | the Draw button's text after the ✎, and its title, e.g. `label="Scribble"` for "✎ Scribble"; blank is the default | `Draw` |
 | `toggles-scope` | `layer`: Show and Print scribbles remembered per layer; `browser`: one choice for every layer on every page | `layer` |
 | `theme` | `light`, `dark`, `auto` | `auto` |
 
@@ -414,6 +415,12 @@ page (pens; pictures pasted with Ctrl+V, dropped, or added from a file, moved an
 the Move picture tool; Copy as PNG), Move up, Move down, Remove. Pages are saved in the
 browser (IndexedDB) per page and print one per sheet, after everything before them (put the
 element at the end of the page). Its bar also has Save file, Open file and Print.
+
+The bar's "✎ Draw on pages" button turns on the pen tool bar for the notes and drawing pages
+only, never the rest of the page (that is a `<draw-layer>`'s own Draw button). It shows only
+while at least one page exists: adding the first page, loading saved pages or opening a file
+with pages brings it, and removing the last page hides it and turns drawing off. Add drawing
+page turns drawing on by itself.
 
 | Attribute | Values | Default |
 |---|---|---|

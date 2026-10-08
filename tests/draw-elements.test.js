@@ -130,6 +130,32 @@ test('<toy-pages> adds notes and drawing pages, reorders and removes them, and k
   await assert.rejects(pages.addPage('map'), /"notes" or "drawing"/);
 });
 
+test('<toy-pages>\'s "Draw on pages" button shows only while a page exists, and removing the last turns drawing off', async () => {
+  const { doc } = await page('<toy-pages id="drawon"></toy-pages>', 'https://host.example/draw-on/');
+  const pages = doc.querySelector('toy-pages');
+  const toggle = pages.shadowRoot.querySelector('.draw');
+  const container = pages.shadowRoot.querySelector('.pages');
+  assert.deepEqual([toggle.textContent, toggle.title], ['✎ Draw on pages', 'Draw on pages']);
+  assert.equal(toggle.hidden, true, 'no pages, nothing to draw on');
+  const notes = await pages.addPage('notes');
+  assert.equal(toggle.hidden, false, 'a notes page brings it');
+  toggle.click();
+  assert.equal(container.classList.contains('drawing'), true);
+  await pages.removePage(notes);
+  assert.equal(toggle.hidden, true, 'the last page gone takes it');
+  assert.equal(container.classList.contains('drawing'), false, 'and turns drawing off');
+  assert.equal(toggle.getAttribute('aria-pressed'), 'false');
+  await pages.addPage('drawing');
+  assert.deepEqual([toggle.hidden, container.classList.contains('drawing')], [false, true], 'a drawing page turns drawing on as before');
+  await (await pages.implementation()).flush();
+  const again = await page('<toy-pages id="drawon"></toy-pages>', 'https://host.example/draw-on/');
+  assert.equal(again.doc.querySelector('toy-pages').shadowRoot.querySelector('.draw').hidden, false, 'saved pages bring it');
+  await pages.loadToyboxState({ pages: [] });
+  assert.equal(toggle.hidden, true, 'a file with no pages takes it');
+  await pages.loadToyboxState(await again.doc.querySelector('toy-pages').toyboxState());
+  assert.equal(toggle.hidden, false, 'a file with pages brings it');
+});
+
 test('the pages print after the page, one per sheet, without their buttons', () => {
   const print = PAGES_CSS.slice(PAGES_CSS.indexOf('@media print'));
   assert.match(print, /\.bar, \.pagebar, \.toast \{ display: none !important; \}/);

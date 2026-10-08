@@ -87,6 +87,25 @@ test('the button sits in the lower left by default and in the corner="…" given
   assert.throws(() => add(doc, '<draw-layer id="ink3" for="#card" corner="middle"></draw-layer>'), /corner "middle" is not one of/);
 });
 
+test('label="…" names the Draw button and its title, "Draw" by default or when blank, and a change renames it', async () => {
+  const { doc, dock } = await page('<div id="card"></div><draw-layer id="ink" for="#card"></draw-layer>');
+  const toggleOf = (layer) => dockOf(layer).querySelector('.draw');
+  assert.equal(dock().querySelector('.draw').textContent, '✎ Draw');
+  assert.equal(dock().querySelector('.draw').title, 'Draw');
+  const named = add(doc, '<draw-layer id="ink2" for="#card" label="Scribble"></draw-layer>');
+  await named.ready;
+  assert.deepEqual([toggleOf(named).textContent, toggleOf(named).title], ['✎ Scribble', 'Scribble']);
+  named.setAttribute('label', 'Mark <b>up</b>');
+  assert.deepEqual([toggleOf(named).textContent, toggleOf(named).title], ['✎ Mark <b>up</b>', 'Mark <b>up</b>'], 'a changed label renames it, as text');
+  named.setAttribute('label', '   ');
+  assert.deepEqual([toggleOf(named).textContent, toggleOf(named).title], ['✎ Draw', 'Draw'], 'a blank label is the default');
+  named.removeAttribute('label');
+  assert.equal(toggleOf(named).textContent, '✎ Draw');
+  const blank = add(doc, '<draw-layer id="ink3" for="#card" label=""></draw-layer>');
+  await blank.ready;
+  assert.equal(toggleOf(blank).textContent, '✎ Draw');
+});
+
 test('the tool bar shows only while drawing', async () => {
   const { dock } = await page('<div id="card"></div><draw-layer id="ink" for="#card"></draw-layer>');
   assert.match(DOCK_CSS, /\.dock:not\(\.drawing\) \.body \{ display: none; \}/);
