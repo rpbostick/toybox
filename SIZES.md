@@ -39,9 +39,9 @@ only the small module that frames the page; the page itself is measured below.
 
 | Build | Files | On disk | Gzipped |
 |---|---:|---:|---:|
-| ES modules: `dist/toybox.js`, `dist/toys/`, `dist/chunks/` (a page loads the entry and only the toys and elements it uses) | 74 | 349.8 KB | 134.8 KB |
+| ES modules: `dist/toybox.js`, `dist/toys/`, `dist/chunks/` (a page loads the entry and only the toys and elements it uses) | 74 | 344.9 KB | 132.8 KB |
 | Classic script: `dist/toybox.iife.js` (the toys, `<toy-drawer>` and `<toy-box>`, in one file) | 1 | 197.2 KB | 65.2 KB |
-| Classic script: `dist/toybox-all.iife.js` (every toy and element in one file) | 1 | 341.4 KB | 115.9 KB |
+| Classic script: `dist/toybox-all.iife.js` (every toy and element in one file) | 1 | 336.5 KB | 114.2 KB |
 | dice-box for the 3D dice, `dist/dice-box/` (loaded when 3D is switched on; copied by `build.sh` from the npm package) | 13 | 3258.9 KB | 972.9 KB |
 
 ## The base script and its chunks
@@ -58,38 +58,38 @@ when a `<toy-background>` connects, and so on). Each
 | `chunks/background-S6EHDIYT.js` | 51.7 KB | 19.4 KB | `src/background/background.js`: @rpbostick/reactbits-kit, background/, background/effects/ | toybox.js |
 | `chunks/chunk-3QUE5FBM.js` | 24.9 KB | 6.7 KB | toys/ | chunks/oil-and-water-6OO3BH44.js, toys/oil-and-water.js |
 | `chunks/tray-PXCFORLL.js` | 21.4 KB | 8.4 KB | `src/dice/tray.js`: dice/ | toybox.js |
-| `chunks/chunk-EJTEL5EM.js` | 18.8 KB | 7.5 KB | draw/, perfect-freehand | chunks/chunk-KUA7QZVR.js, chunks/image-editor-WY2BYOLR.js, chunks/layer-SG7CIOIC.js and 1 more |
-| `chunks/pages-VUKLCITQ.js` | 10.1 KB | 4.2 KB | `src/draw/pages.js`: draw/ | toybox.js |
+| `chunks/chunk-N3B36W4K.js` | 14.8 KB | 5.9 KB | draw/, perfect-freehand | chunks/chunk-H6SXXB37.js, chunks/image-editor-MIXJGZWV.js, chunks/layer-PNCZNR5K.js and 1 more |
+| `chunks/pages-W6MCDBGF.js` | 9.7 KB | 4.1 KB | `src/draw/pages.js`: draw/ | toybox.js |
 | `chunks/chunk-VLVJMUNF.js` | 8.2 KB | 3.1 KB | toys/ | chunks/ripple-tank-3R27W7U2.js, toys/ripple-tank.js |
-| `chunks/layer-SG7CIOIC.js` | 7.7 KB | 3.3 KB | `src/draw/layer.js`: draw/ | toybox.js |
-| `chunks/chunk-4RRQYAXX.js` | 6.1 KB | 2.7 KB | dice/ | chunks/chunk-M67JAIKU.js, chunks/file-TSHGLGDJ.js, chunks/pages-VUKLCITQ.js and 1 more |
+| `chunks/layer-PNCZNR5K.js` | 7.6 KB | 3.3 KB | `src/draw/layer.js`: draw/ | toybox.js |
+| `chunks/chunk-4RRQYAXX.js` | 6.1 KB | 2.7 KB | dice/ | chunks/chunk-M67JAIKU.js, chunks/file-TSHGLGDJ.js, chunks/pages-W6MCDBGF.js and 1 more |
 | `chunks/chunk-B2H3XYVZ.js` | 6.0 KB | 2.8 KB | toys/ | chunks/pendulums-VMOAZRKF.js, toys/pendulums.js |
-| `chunks/image-editor-WY2BYOLR.js` | 5.5 KB | 2.6 KB | `src/draw/image-editor.js`: draw/ | toybox.js |
 | `chunks/chunk-6SXSQMXM.js` | 5.4 KB | 2.4 KB | toys/ | chunks/string-K6TZITAK.js, toys/string.js |
+| `chunks/image-editor-MIXJGZWV.js` | 5.2 KB | 2.5 KB | `src/draw/image-editor.js`: draw/ | toybox.js |
 | `chunks/chunk-I3M5WXFC.js` | 4.7 KB | 2.1 KB | runtime.js | chunks/background-S6EHDIYT.js, chunks/bubble-wrap-5UI5FWJ7.js, chunks/chunk-2HAHNKBT.js and 52 more |
 | `chunks/chunk-2MSCG6NQ.js` | 4.1 KB | 2.0 KB | dice/, elements/ | chunks/tray-PXCFORLL.js, toybox.js |
-| `chunks/chunk-KUA7QZVR.js` | 3.9 KB | 1.8 KB | draw/ | chunks/image-editor-WY2BYOLR.js, chunks/pages-VUKLCITQ.js |
+| `chunks/chunk-H6SXXB37.js` | 3.9 KB | 1.8 KB | draw/ | chunks/image-editor-MIXJGZWV.js, chunks/pages-W6MCDBGF.js |
 | `chunks/chunk-ISKHTSV2.js` | 3.4 KB | 1.2 KB | catalog.js | chunks/bubble-wrap-5UI5FWJ7.js, chunks/chunk-2HAHNKBT.js, chunks/chunk-3K7NK4ZP.js and 46 more |
 | `chunks/chunk-JLIJZRM2.js` | 3.3 KB | 1.7 KB | toys/ | chunks/lava-lamp-NKOWV3OA.js, toys/lava-lamp.js |
 | `chunks/chunk-N26AOHMI.js` | 3.1 KB | 1.5 KB | toys/ | chunks/kaleidoscope-7G7CI5QT.js, toys/kaleidoscope.js |
 | `chunks/chunk-2HAHNKBT.js` | 3.1 KB | 1.6 KB | toys/ | chunks/zen-garden-6C6WAHTR.js, toys/zen-garden.js |
 | `chunks/chunk-5RRYKUS4.js` | 3.0 KB | 1.6 KB | toys/ | chunks/pin-art-V7MJF2BQ.js, toys/pin-art.js |
 | `chunks/chunk-3K7NK4ZP.js` | 3.0 KB | 1.4 KB | toys/ | chunks/fidget-spinner-WCAM4JKD.js, toys/fidget-spinner.js |
-| `chunks/chunk-OYAUKGGD.js` | 2.9 KB | 1.2 KB | draw/ | chunks/chunk-M67JAIKU.js, chunks/file-TSHGLGDJ.js, chunks/image-editor-WY2BYOLR.js and 2 more |
+| `chunks/chunk-OYAUKGGD.js` | 2.9 KB | 1.2 KB | draw/ | chunks/chunk-M67JAIKU.js, chunks/file-TSHGLGDJ.js, chunks/image-editor-MIXJGZWV.js and 2 more |
 | `chunks/chunk-P3O4WOSU.js` | 2.9 KB | 1.4 KB | toys/ | chunks/spirograph-YJHJV4IA.js, toys/spirograph.js |
 | `chunks/chunk-KLMKOO5R.js` | 2.8 KB | 1.4 KB | toys/ | chunks/drip-timer-KAWN4IZY.js, toys/drip-timer.js |
 | `chunks/chunk-TRYF5R3P.js` | 2.7 KB | 1.2 KB | background/ | chunks/background-S6EHDIYT.js, toybox.js |
 | `chunks/chunk-TDE3UTQM.js` | 2.6 KB | 1.3 KB | toys/ | chunks/bubble-wrap-5UI5FWJ7.js, toys/bubble-wrap.js |
-| `chunks/chunk-3CDEPU2A.js` | 1.7 KB | 0.8 KB | elements/ | chunks/background-S6EHDIYT.js, chunks/chunk-EJTEL5EM.js, chunks/image-editor-WY2BYOLR.js and 4 more |
+| `chunks/chunk-3CDEPU2A.js` | 1.7 KB | 0.8 KB | elements/ | chunks/background-S6EHDIYT.js, chunks/chunk-N3B36W4K.js, chunks/image-editor-MIXJGZWV.js and 4 more |
 | `chunks/chunk-64CIRSZI.js` | 1.6 KB | 0.9 KB | toys/ | chunks/stacking-blocks-RGJC7MCA.js, toys/stacking-blocks.js |
 | `chunks/chunk-GANQSWJV.js` | 1.6 KB | 0.9 KB | toys/ | chunks/newtons-cradle-VVRIGPW2.js, toys/newtons-cradle.js |
-| `chunks/chunk-M67JAIKU.js` | 1.4 KB | 0.8 KB | draw/ | chunks/file-TSHGLGDJ.js, chunks/pages-VUKLCITQ.js |
-| `chunks/chunk-IS57XJVY.js` | 1.2 KB | 0.6 KB | draw/ | chunks/layer-SG7CIOIC.js, toybox.js |
-| `chunks/chunk-MTZBQDF3.js` | 1.1 KB | 0.6 KB | draw/, idb-keyval | chunks/layer-SG7CIOIC.js, chunks/pages-VUKLCITQ.js |
-| `chunks/chunk-XWRXV264.js` | 0.7 KB | 0.4 KB | draw/ | chunks/chunk-M67JAIKU.js, chunks/file-TSHGLGDJ.js, chunks/pages-VUKLCITQ.js and 1 more |
+| `chunks/chunk-M67JAIKU.js` | 1.4 KB | 0.8 KB | draw/ | chunks/file-TSHGLGDJ.js, chunks/pages-W6MCDBGF.js |
+| `chunks/chunk-IS57XJVY.js` | 1.2 KB | 0.6 KB | draw/ | chunks/layer-PNCZNR5K.js, toybox.js |
+| `chunks/chunk-MTZBQDF3.js` | 1.1 KB | 0.6 KB | draw/, idb-keyval | chunks/layer-PNCZNR5K.js, chunks/pages-W6MCDBGF.js |
+| `chunks/chunk-XWRXV264.js` | 0.7 KB | 0.4 KB | draw/ | chunks/chunk-M67JAIKU.js, chunks/file-TSHGLGDJ.js, chunks/pages-W6MCDBGF.js and 1 more |
 | `chunks/chunk-2VKSGUMZ.js` | 0.7 KB | 0.5 KB | toys/ | chunks/chunk-GCJJ56R4.js, chunks/chunk-QGE247I7.js, chunks/music-box-VUUFJFDG.js and 3 more |
 | `chunks/chunk-DCANE7XH.js` | 0.6 KB | 0.4 KB | esbuild's module helpers | chunks/background-S6EHDIYT.js, chunks/bubble-wrap-5UI5FWJ7.js, chunks/chunk-2MSCG6NQ.js and 41 more |
-| `chunks/chunk-WNI6WUEP.js` | 0.5 KB | 0.3 KB | elements/ | chunks/chunk-2MSCG6NQ.js, chunks/layer-SG7CIOIC.js, chunks/tray-PXCFORLL.js and 1 more |
+| `chunks/chunk-WNI6WUEP.js` | 0.5 KB | 0.3 KB | elements/ | chunks/chunk-2MSCG6NQ.js, chunks/layer-PNCZNR5K.js, chunks/tray-PXCFORLL.js and 1 more |
 | `chunks/chunk-QGE247I7.js` | 0.4 KB | 0.3 KB | toys/ | chunks/twisty-cube-ZKNPVB2B.js, toys/twisty-cube.js |
 | `chunks/chunk-IL75OGFX.js` | 0.4 KB | 0.3 KB | assets.js | chunks/chunk-2VKSGUMZ.js, chunks/music-box-VUUFJFDG.js, chunks/tray-PXCFORLL.js and 18 more |
 | `chunks/chunk-GCJJ56R4.js` | 0.4 KB | 0.3 KB | toys/ | chunks/music-box-VUUFJFDG.js, toys/music-box.js |
@@ -117,7 +117,7 @@ when a `<toy-background>` connects, and so on). Each
 | Page | Files | On disk | Gzipped | Of which |
 |---|---:|---:|---:|---|
 | Twisty cube, `dist/twisty/` (without source.zip) | 14 | 1029.4 KB | 251.1 KB | `app/`: 971.4 KB, 11 files |
-| Twisty cube source, `dist/twisty/source.zip` | 1 | 7138.7 KB | — | |
+| Twisty cube source, `dist/twisty/source.zip` | 1 | 7138.8 KB | — | |
 | Music box, `dist/music-box/` (without source.zip) | 9 | 490.0 KB | 118.5 KB | `app/`: 402.0 KB, 4 files |
 | Music box source, `dist/music-box/source.zip` | 1 | 308.2 KB | — | |
 

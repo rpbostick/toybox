@@ -1,4 +1,4 @@
-// The colours last drawn with or picked by the eyedropper, newest first, shared by every pen tool
+// The colours last drawn with, newest first, shared by every pen tool
 // bar in the browser and remembered in localStorage (remembered.js).
 import { remembered } from '../elements/remembered.js';
 

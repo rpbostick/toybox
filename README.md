@@ -360,7 +360,7 @@ why Toybox contains none of them and the example installs one into the site inst
 
 A scribble layer over any element: `for` names it. A small Draw button sits in a corner of
 the window (while on, the pointer draws instead of reaching the element) and opens the tool
-bar: pen, highlighter, eraser, colours, Eyedropper, recent colours, size, Undo, Redo (also
+bar: pen, highlighter, eraser, colours, recent colours, size, Undo, Redo (also
 Ctrl+Z, Ctrl+Shift+Z), Clear, and two separate boxes: Show scribbles (on screen) and Print
 scribbles (in print). Strokes are kept in units of the element's width, so they scale with it;
 they are saved in the browser (IndexedDB) per page under the layer's `id` (or its `for`).
@@ -381,21 +381,8 @@ the menu wins over `corner`.
 | `toggles-scope` | `layer`: Show and Print scribbles remembered per layer; `browser`: one choice for every layer on every page | `layer` |
 | `theme` | `light`, `dark`, `auto` | `auto` |
 
-**Eyedropper and recent colours** (in `<draw-layer>`, `<toy-pages>` and the image editor
-alike). The Eyedropper button picks a colour and makes it the pen's (the highlighter's while
-the highlighter is in hand); the tool in hand stays the same. Where the browser has the
-EyeDropper API (Chrome, Edge and other Chromium browsers) its own picker opens and can pick
-from anywhere on screen, and its Esc cancels. Elsewhere (Firefox, Safari) the cursor becomes a
-crosshair over the drawing, the next click picks there instead of drawing, and Esc cancels.
-That pick is worked out from Toybox's own data and the page under it, top down until opaque:
-the strokes (the exact pen colour; a highlighter at its opacity over what is under it), the
-pictures on a drawing page or in the image editor (their pixel), then the element under the
-layer: an `<img>` or `<canvas>` gives its pixel, any other element its background colour,
-and a page with no background colour at all reads as white. It cannot pick text or border
-colours, CSS background images or gradients, `<video>`, SVG content of the page, an `<img>`
-from another origin served without CORS (its background colour is used instead), or a WebGL
-canvas made without `preserveDrawingBuffer`; nor anything outside the drawing.
-Beside the colours is a row of the last 8 colours drawn with or picked, newest first, shared
+**Recent colours** (in `<draw-layer>`, `<toy-pages>` and the image editor alike). Beside the
+colours is a row of the last 8 colours drawn with, newest first, shared
 by every tool bar and remembered per browser (`localStorage`, `toybox.draw.recent-colors`);
 each is a button, so Tab and Enter or Space reach and use it.
 

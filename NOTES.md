@@ -142,12 +142,8 @@ load from `file://` in Firefox): `node e2e/serve.mjs` serves `dist/` under a sub
   target, an svg 1000 units across whose height follows the target's aspect ratio. Strokes,
   pages and pictures are checked on every read (`src/draw/savefile.js`) and kept in IndexedDB
   through idb-keyval (`src/draw/store.js`); autosave stays off when a saved copy cannot be
-  read, so it is not overwritten. The eyedropper (`src/draw/tools.js`) uses the EyeDropper API
-  where there is one; elsewhere `src/draw/eyedropper.js` works out the colour under a click
-  from the strokes' own data, the pictures' pixels and the hit-test stack under the layer (see
-  the README for what it can and cannot sample). Only the second path was run here (Firefox);
-  the EyeDropper API path is tested with a stub, not in Chromium. The recent colours
-  (`src/draw/recent.js`) are a display preference in `localStorage`.
+  read, so it is not overwritten. The recent colours (`src/draw/recent.js`) are a display
+  preference in `localStorage`.
 - **Browser run, elements.** `e2e/drive.mjs` also drives the demo's elements with real
   pointer input: the pool and its roll, dN, the resize handle dragged smaller and past the
   minimum, a `data-roll` button, 3D dice loading dice-box from `dice-box/` and a d7 falling
@@ -157,7 +153,7 @@ load from `file://` in Firefox): `node e2e/serve.mjs` serves `dist/` under a sub
   starts on bare background and goes over content, `null` on release, nothing for a drag from
   content or with "reacts to the mouse" off, the grab and grabbing cursors), each of the six
   backgrounds drawing (with a screenshot and the pointer dragged on bare background), a stroke
-  on the card and the eyedropper picking its colour back, Show scribbles, the Draw button put
+  on the card and its colour heading the recent colours, Show scribbles, the Draw button put
   in the upper right from its menu and drawn with there, dragged by its grip past the window's
   edge (it stops 16 px in) and reset, notes and drawing pages, Move up, the image
   editor on the portrait, and that every chunk came from `chunks/` under the sub-path.

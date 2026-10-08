@@ -6,7 +6,7 @@
 // R and Shift+R by key (solved again), a move button, Undo, a click on the cube and the
 // instructions panel.
 // Also drives the page's elements: the dice tray, dragging the background, the drawing layer
-// and its eyedropper, the pages and the image editor.
+// and its recent colours, the pages and the image editor.
 // Usage:
 //   node e2e/drive.mjs <demo page url> <output dir> [--dark] [--reduced-motion]
 // --reduced-motion also checks every toy opens paused (then presses Play and plays as usual).
@@ -682,7 +682,7 @@ async function checkDrawLayer() {
   const strokes = await ink('return (await layer.strokes()).length;');
   check('draw layer: a stroke drawn over the card is kept', strokes === 1, String(strokes));
   await shot('draw-layer');
-  await checkEyedropper(ink, points[1]);
+  await checkRecentColours(ink);
   await ink("const box = root.querySelector('.show'); box.click();");
   check('draw layer: Show scribbles off hides them on screen', await ink("return overlay.dataset.show === '0' && getComputedStyle(overlay.shadowRoot.querySelector('svg')).visibility === 'hidden';"));
   check('draw layer: Print scribbles stays on while they are hidden on screen', await ink("return overlay.dataset.print === '1';"));
@@ -738,24 +738,12 @@ async function checkDrawButtonPlace(ink) {
   await pickCorner('bottom-left');
 }
 
-// Firefox has no EyeDropper API, so this is the path that samples Toybox's own drawing: with
-// another colour chosen, the Eyedropper and a click on a point of the stroke give the pen the
-// stroke's colour back, without drawing.
-async function checkEyedropper(ink, onStroke) {
+// The stroke's colour heads the recent colours, and the tool bar has no Eyedropper.
+async function checkRecentColours(ink) {
   const drawn = await ink("return (await layer.strokes())[0].color;");
-  await ink("root.querySelector('.swatches [data-color=\"#3b6fb5\"]').click();");
-  // Pressed from script: the dice tray's open window covers the tool bar at this scroll position.
-  await ink("root.querySelector('.eyedropper').click();");
-  const waiting = await ink("return { api: 'EyeDropper' in window, pressed: root.querySelector('.eyedropper').getAttribute('aria-pressed'), cursor: getComputedStyle(overlay).cursor, state: root.querySelector('.pickstate').textContent };");
-  check('eyedropper: no EyeDropper API in Firefox, so it waits for a click with a crosshair',
-    !waiting.api && waiting.pressed === 'true' && waiting.cursor === 'crosshair', JSON.stringify(waiting));
-  await pointerAt([onStroke]);
-  await sleep(200);
-  const after = await ink("return { color: root.querySelector('.color').value, strokes: (await layer.strokes()).length, recent: root.querySelector('.recents button')?.dataset.color, picking: root.querySelector('.eyedropper').getAttribute('aria-pressed'), state: root.querySelector('.pickstate').textContent };");
-  check('eyedropper: a click on the stroke picks its colour for the pen, draws nothing and ends the pick',
-    after.color === drawn && after.strokes === 1 && after.picking === 'false', JSON.stringify({ drawn, after }));
-  check('eyedropper: the picked colour heads the recent colours', after.recent === drawn, JSON.stringify(after));
-  await shot('eyedropper');
+  const bar = await ink("return { recent: root.querySelector('.recents button')?.dataset.color, eyedropper: [...root.querySelectorAll('.inkbar button')].some((button) => /eyedropper/i.test(button.className + ' ' + button.textContent)) };");
+  check('recent colours: the drawn colour heads the row', bar.recent === drawn, JSON.stringify({ drawn, bar }));
+  check('draw layer: the tool bar has no Eyedropper', !bar.eyedropper, JSON.stringify(bar));
 }
 
 async function checkPagesAndEditor() {

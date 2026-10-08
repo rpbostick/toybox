@@ -1,6 +1,5 @@
 // The pen tool bar shared by <draw-layer>, <toy-pages> and the image editor: Draw on/off, the
-// tools, colour swatches and picker, the eyedropper and recent colours, size, undo, redo and
-// clear. Sizes are in the layers' own units (1000 across), so a stroke keeps its weight relative
+// tools, colour swatches and picker, recent colours, size, undo, redo and clear. Sizes are in the layers' own units (1000 across), so a stroke keeps its weight relative
 // to what it is drawn on at any size and in print.
 import { RECENT_EVENT, recentColors } from './recent.js';
 
@@ -16,7 +15,6 @@ export const TOOLBAR_CSS = `
   .inkbar .tools, .inkbar .swatches, .inkbar .recents { display: inline-flex; gap: .2rem; }
   .inkbar .recents:empty { display: none; }
   .inkbar .recents .swatch { width: 1rem; height: 1rem; }
-  .inkbar .pickstate { font-size: .75rem; color: var(--soft); }
   .inkbar .swatch { width: 1.3rem; height: 1.3rem; padding: 0; border-radius: 50%; border: 1px solid var(--soft); cursor: pointer; }
   .inkbar .swatch[aria-pressed="true"] { outline: 2px solid var(--accent); outline-offset: 1px; }
   .inkbar input[type=range] { width: 80px; }
@@ -26,14 +24,10 @@ export const TOOLBAR_CSS = `
 /**
  * tools: which of pen, highlighter, eraser, move to offer. drawToggle false leaves the tools
  * always on (the image editor); toggleLabel names the Draw button, so a page with two of them
- * can say what each draws on. Callbacks: onDraw(on), onUndo(), onRedo(), onClear(),
- * onPicking(on) while the eyedropper waits for a click on the surface, and
- * sampleAt(pointerEvent), resolving to the #rrggbb under the click (eyedropper.js) for browsers
- * without the EyeDropper API. The host passes its drawing surface to watchPicks().
+ * can say what each draws on. Callbacks: onDraw(on), onUndo(), onRedo(), onClear().
  */
-export function createToolbar(doc, { tools = ['pen', 'highlighter', 'eraser'], drawToggle = true, toggleLabel = 'Draw', onDraw = () => {}, onUndo, onRedo, onClear, onPicking = () => {}, sampleAt }) {
+export function createToolbar(doc, { tools = ['pen', 'highlighter', 'eraser'], drawToggle = true, toggleLabel = 'Draw', onDraw = () => {}, onUndo, onRedo, onClear }) {
   for (const name of tools) if (!TOOL_LABELS[name]) throw new Error(`no drawing tool ${name}`);
-  if (typeof sampleAt !== 'function') throw new Error('createToolbar: sampleAt(event) must be a function');
   const win = doc.defaultView;
   const abort = new AbortController();
   const recent = recentColors(win);
@@ -41,7 +35,6 @@ export function createToolbar(doc, { tools = ['pen', 'highlighter', 'eraser'], d
   let tool = tools[0];
   let lastDrawing = tool;
   let drawing = !drawToggle;
-  let picking = false;
   const bar = doc.createElement('div');
   bar.className = `inkbar${drawing ? ' drawing' : ''}`;
   bar.setAttribute('role', 'toolbar');
@@ -52,9 +45,7 @@ export function createToolbar(doc, { tools = ['pen', 'highlighter', 'eraser'], d
     <span class="tools when-drawing">${tools.map((key) => `<button type="button" class="btn" data-tool="${key}" aria-pressed="${key === tool}">${TOOL_LABELS[key]}</button>`).join('')}</span>
     <span class="swatches when-drawing">${SWATCHES.map((color) => `<button type="button" class="swatch" data-color="${color}" style="background:${color}" aria-label="Colour ${color}"></button>`).join('')}</span>
     <label class="check when-drawing">Colour <input type="color" class="color"></label>
-    <button type="button" class="btn eyedropper when-drawing" aria-pressed="false" title="Pick a colour from what is under the pointer (Esc cancels)">Eyedropper</button>
     <span class="recents when-drawing" role="group" aria-label="Recent colours"></span>
-    <span class="pickstate when-drawing" aria-live="polite"></span>
     <label class="check when-drawing">Size <input type="range" class="size" min="1" max="60"></label>
     <button type="button" class="btn undo when-drawing" title="Undo (Ctrl+Z)">Undo</button>
     <button type="button" class="btn redo when-drawing" title="Redo (Ctrl+Shift+Z)">Redo</button>
@@ -63,7 +54,6 @@ export function createToolbar(doc, { tools = ['pen', 'highlighter', 'eraser'], d
   const $ = (selector) => bar.querySelector(selector);
   const color = $('.color');
   const size = $('.size');
-  const dropper = $('.eyedropper');
   const recents = $('.recents');
   // Its own listener rather than the bar's, so the host can put it anywhere (<draw-layer> keeps
   // it in place while the bar opens beside it).
@@ -77,7 +67,6 @@ export function createToolbar(doc, { tools = ['pen', 'highlighter', 'eraser'], d
     toggle.title = label;
   }
   if (toggle) setToggleLabel(toggleLabel);
-  const say = (text) => { $('.pickstate').textContent = text; };
 
   function showRecents() {
     recents.replaceChildren(...recent.read().map((hex) => {
@@ -117,53 +106,6 @@ export function createToolbar(doc, { tools = ['pen', 'highlighter', 'eraser'], d
     return { tool: current, ...settings[current] };
   }
 
-  // A picked colour goes to the tool in hand when it has a colour, else to the last drawing tool
-  // that has one (Move picture keeps it), else the pen.
-  function usePicked(hex) {
-    const owner = settings[tool] ? tool : settings[lastDrawing] ? lastDrawing : 'pen';
-    settings[owner].color = hex;
-    recent.add(hex);
-    say(`Picked ${hex}.`);
-    showSettings();
-  }
-
-  function setPicking(on) {
-    picking = on;
-    bar.classList.toggle('picking', on);
-    dropper.setAttribute('aria-pressed', String(on));
-    onPicking(on);
-  }
-
-  // With the EyeDropper API (Chromium) the browser's own picker samples anything on screen and
-  // handles Esc itself; elsewhere the next click on the surface is sampled by sampleAt.
-  async function startPicking() {
-    if (picking) {
-      setPicking(false);
-      say('');
-      return;
-    }
-    if (win.EyeDropper) {
-      let result;
-      try {
-        result = await new win.EyeDropper().open();
-      } catch (error) {
-        if (error?.name !== 'AbortError') throw error;
-        say('Eyedropper cancelled.');
-        return;
-      }
-      usePicked(checkedHex(result.sRGBHex));
-      return;
-    }
-    setPicking(true);
-    say('Click to pick a colour; Esc cancels.');
-  }
-
-  async function pickAt(event) {
-    setPicking(false);
-    say('');
-    usePicked(checkedHex(await sampleAt(event)));
-  }
-
   function setTool(next) {
     if (!tools.includes(next)) throw new Error(`no drawing tool ${next} here; the tools are ${tools.join(', ')}`);
     tool = next;
@@ -176,7 +118,6 @@ export function createToolbar(doc, { tools = ['pen', 'highlighter', 'eraser'], d
     drawing = on;
     bar.classList.toggle('drawing', on);
     toggle?.setAttribute('aria-pressed', String(on));
-    if (!on && picking) setPicking(false);
     onDraw(on);
   }
 
@@ -188,21 +129,12 @@ export function createToolbar(doc, { tools = ['pen', 'highlighter', 'eraser'], d
       if (!settings[tool]) return;
       settings[tool].color = button.dataset.color;
       showSettings();
-    } else if (button === dropper) startPicking().catch((error) => say(`The eyedropper failed: ${error.message}`));
-    else if (button.classList.contains('undo')) onUndo();
+    } else if (button.classList.contains('undo')) onUndo();
     else if (button.classList.contains('redo')) onRedo();
     else if (button.classList.contains('clear')) onClear();
   });
   color.addEventListener('input', () => { settings[tool].color = color.value; showSettings(); });
   size.addEventListener('input', () => { settings[tool].size = Number(size.value); });
-  // Esc ends a pick before anything else hears it (the image editor closes on Esc otherwise).
-  win.addEventListener('keydown', (event) => {
-    if (!picking || event.key !== 'Escape') return;
-    event.preventDefault();
-    event.stopPropagation();
-    setPicking(false);
-    say('Eyedropper cancelled.');
-  }, { capture: true, signal: abort.signal });
   win.addEventListener(RECENT_EVENT, showRecents, { signal: abort.signal });
   showRecents();
 
@@ -216,24 +148,9 @@ export function createToolbar(doc, { tools = ['pen', 'highlighter', 'eraser'], d
     setToggleLabel,
     get tool() { return tool; },
     get drawing() { return drawing; },
-    get picking() { return picking; },
     showTarget(name) { $('.target').textContent = name ? `on: ${name}` : ''; },
-    /** While picking, a press on `surface` is sampled instead of drawing or moving a picture. */
-    watchPicks(surface) {
-      surface.addEventListener('pointerdown', (event) => {
-        if (!picking || event.button !== 0) return;
-        event.preventDefault();
-        event.stopPropagation();
-        pickAt(event).catch((error) => say(`The eyedropper failed: ${error.message}`));
-      }, { capture: true, signal: abort.signal });
-    },
     destroy() {
       abort.abort();
     },
   };
-}
-
-function checkedHex(value) {
-  if (typeof value !== 'string' || !/^#[0-9a-f]{6}$/i.test(value)) throw new Error(`the eyedropper gave ${JSON.stringify(value)}, not #rrggbb`);
-  return value.toLowerCase();
 }

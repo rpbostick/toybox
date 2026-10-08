@@ -7,7 +7,6 @@ import { pageKey, remembered } from '../elements/remembered.js';
 import { CONTROL_RULES, THEME_RULES } from '../elements/theme.js';
 import { DOCK_CSS, createDock } from './button-dock.js';
 import { InkLayer, makeSvg } from './ink.js';
-import { sampleColor } from './eyedropper.js';
 import { checkLayerState } from './savefile.js';
 import { autosave, load } from './store.js';
 import { TOOLBAR_CSS, createToolbar } from './tools.js';
@@ -80,13 +79,7 @@ export function mount(host, wrapper) {
       dock.setDrawing(drawing);
     },
     onUndo: () => ink.undo(), onRedo: () => ink.redo(), onClear: () => ink.clear(),
-    // The overlay takes the click; under it are the target's own content and the page.
-    sampleAt: (event) => sampleColor(win, {
-      x: event.clientX, y: event.clientY, root: doc, skip: (element) => element === overlay,
-      ink: { svg, strokes: ink.history.strokes },
-    }),
   });
-  toolbar.watchPicks(overlay);
   const ink = new InkLayer(svg, {
     name: host.toyboxKey, brush: toolbar.brush,
     onChange: () => {

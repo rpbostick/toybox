@@ -5,7 +5,6 @@
 // it again loses nothing; options.state reopens a box from what Done gave before.
 import { CONTROL_RULES, THEME_RULES } from '../elements/theme.js';
 import { PALETTES } from '../runtime.js';
-import { sampleColor } from './eyedropper.js';
 import { InkLayer, makeSvg } from './ink.js';
 import { PictureLayer, canvasBlob, canvasDataURL, imageFileFrom, readPicture, renderToCanvas } from './pictures.js';
 import { checkImages, checkStrokes } from './savefile.js';
@@ -40,7 +39,6 @@ const EDITOR_CSS = `
   .box svg.dim path { fill: rgba(0,0,0,.55); }
   .box svg.dim .frame { fill: none; stroke: #fff; stroke-width: 3; vector-effect: non-scaling-stroke; }
   .box.moving svg.ink { pointer-events: none; }
-  .box.picking svg.ink { pointer-events: auto; cursor: crosshair; }
   .pic-outline { fill: none; stroke: #7aa6e0; stroke-width: 3; stroke-dasharray: 8 5; vector-effect: non-scaling-stroke; }
   .pic-handle { fill: #7aa6e0; cursor: nwse-resize; }`;
 
@@ -99,15 +97,7 @@ export function editImage(element, { notch = 0, theme, state } = {}) {
   const toolbar = createToolbar(doc, {
     tools: ['pen', 'highlighter', 'eraser', 'move'], drawToggle: false,
     onUndo: () => ink.undo(), onRedo: () => ink.redo(), onClear: () => ink.clear(),
-    onPicking: (picking) => box.classList.toggle('picking', picking),
-    // Under the strokes and pictures is the editor's backdrop over the page, not the element being
-    // edited; the dimming outside the frame is not counted.
-    sampleAt: (event) => sampleColor(win, {
-      x: event.clientX, y: event.clientY, root: shadow, skip: (element) => Boolean(element.closest('svg.ink, svg.pics, svg.dim')),
-      ink: { svg: inkSvg, strokes: ink.history.strokes }, pictures: { svg: pics, images: pictures.images },
-    }),
   });
-  toolbar.watchPicks(box);
   $('.tools-slot').replaceWith(toolbar.el);
   toolbar.el.addEventListener('click', () => box.classList.toggle('moving', toolbar.tool === 'move'));
   const pictures = new PictureLayer(pics, { onChange: () => {}, movable: () => toolbar.tool === 'move' });

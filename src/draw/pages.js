@@ -6,7 +6,6 @@
 import { pageKey } from '../elements/remembered.js';
 import { CONTROL_RULES, THEME_RULES } from '../elements/theme.js';
 import { openFile, saveFile } from './file.js';
-import { sampleColor } from './eyedropper.js';
 import { InkLayer, makeSvg } from './ink.js';
 import { PictureLayer, canvasBlob, imageFileFrom, readPicture, renderToCanvas } from './pictures.js';
 import { checkPagesState } from './savefile.js';
@@ -50,7 +49,6 @@ export const PAGES_CSS = `
   .page svg.ink { pointer-events: none; }
   .pages.drawing .page svg.ink { pointer-events: auto; cursor: crosshair; touch-action: none; }
   .pages.moving .page svg.ink { pointer-events: none; }
-  .pages.picking .page svg.ink { pointer-events: auto; cursor: crosshair; }
   .page .pic-outline { fill: none; stroke: #3b6fb5; stroke-width: 2; stroke-dasharray: 6 4; }
   .page .pic-handle { fill: #3b6fb5; cursor: nwse-resize; }
   .notes { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 6% 7%; }
@@ -109,16 +107,6 @@ export function mount(host, wrapper) {
     toggleLabel: 'Draw on pages',
     onDraw: (drawing) => container.classList.toggle('drawing', drawing),
     onUndo: () => active?.ink.undo(), onRedo: () => active?.ink.redo(), onClear: () => active?.ink.clear(),
-    onPicking: (picking) => container.classList.toggle('picking', picking),
-    sampleAt: (event) => {
-      const entry = pages.find((item) => item.page.contains(event.target));
-      if (!entry) throw new Error('pick a colour on a page');
-      return sampleColor(win, {
-        x: event.clientX, y: event.clientY, root: wrapper.getRootNode(), skip: (element) => Boolean(element.closest('svg.ink, svg.pics')),
-        ink: { svg: entry.ink.svg, strokes: entry.ink.history.strokes },
-        pictures: entry.pictures ? { svg: entry.pictures.svg, images: entry.pictures.images } : null,
-      });
-    },
   });
   bar.prepend(toolbar.el);
   on(toolbar.el, 'click', () => container.classList.toggle('moving', toolbar.tool === 'move'));
@@ -230,7 +218,6 @@ export function mount(host, wrapper) {
     entry.ink.load(data.strokes);
     // A pointer or focus on a page makes it the target of the tools, paste and copy.
     page.addEventListener('pointerdown', () => setActive(entry), { capture: true });
-    toolbar.watchPicks(page);
     page.addEventListener('focusin', () => setActive(entry));
     entry.up.addEventListener('click', () => move(entry, -1));
     entry.down.addEventListener('click', () => move(entry, 1));

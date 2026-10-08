@@ -4,6 +4,17 @@ Versions follow [semantic versioning](https://semver.org/): a change to an eleme
 attributes, the toy interface or the files in `dist/` that breaks a page using them is a new
 major version (a new minor version while the version starts with 0).
 
+## 0.7.0 (2026-10-08)
+
+The drawing tool bar's Eyedropper is removed.
+
+- `<draw-layer>`, `<toy-pages>` and the image editor no longer have an Eyedropper button.
+  Outside Chromium it sampled only element backgrounds, strokes and pictures on a click (not
+  text, SVG or WebGL canvases) and showed nothing while hovering.
+- Recent colours stay as they were: the last 8 colours drawn with, shared by every tool bar.
+- `src/draw/eyedropper.js` is gone, and `createToolbar` (`src/draw/tools.js`) no longer takes
+  `sampleAt` or `onPicking` nor has `watchPicks()` or `picking`.
+
 ## 0.6.2 (2026-10-08)
 
 The two Draw buttons on a page with both `<draw-layer>` and `<toy-pages>` say what they draw on.
